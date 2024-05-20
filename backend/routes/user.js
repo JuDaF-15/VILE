@@ -22,6 +22,9 @@ routerUser.put('/sign/:id', httpUser.putSign)
 
 routerUser.patch('/:id', httpUser.patchUser)
 
+routerUser.put('/:id', httpUser.putUser)
+
+
 routerUser.put("/email/clave", [
     check("mail", "Debe proporcionar el correo").trim().not().isEmpty(),
     validarCampos

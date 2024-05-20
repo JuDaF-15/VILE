@@ -124,6 +124,36 @@ const httpUser = {
         return res.status(200).json({ msg: 'Usuario creado' })
     },
 
+    putUser : async (req, res) => {
+        const data = {
+            name: req.body.name,
+            mail: req.body.mail,
+            identification: req.body.identification,
+            role: req.body.role,
+            position: req.body.position,
+            branch: req.body.branch,
+            paymaster: req.body.paymaster,
+            staffType: req.body.staffType
+        }
+    
+        if (data.role.data == 'user' && data.staffType.index == 0) {
+            data.contract = req.body.contract
+            data.object = req.body.object
+            data.supervisor = req.body.supervisor
+            data.regional = req.body.regional
+            data.institute = req.body.institute
+        }
+    
+        // Encuentra el usuario por ID y actualiza los datos, excluyendo la contraseña
+        await User.findByIdAndUpdate(req.params.id, data, { new: true }, (err, user) => {
+            if (err) {
+                console.log(err);
+                return res.status(400).json({ msg: 'Error, Usuario no actualizado' });
+            }
+            return res.status(200).json({ msg: 'Usuario actualizado', user });
+        });
+    },
+
     postUpload: async (req, res) => {
         if (!req.files) {
 
