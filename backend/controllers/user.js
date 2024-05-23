@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import * as XLSX from "xlsx/xlsx.mjs";
 import sendEmail from "../middlewares/sendEmail.js"
+import user from '../models/user.js'
 
 const saltRounds = 8
 
@@ -124,7 +125,8 @@ const httpUser = {
         return res.status(200).json({ msg: 'Usuario creado' })
     },
 
-    putUser : async (req, res) => {
+    putUser: async (req, res) => {
+        const userId = req.params.id
         const data = {
             name: req.body.name,
             mail: req.body.mail,
@@ -135,23 +137,33 @@ const httpUser = {
             paymaster: req.body.paymaster,
             staffType: req.body.staffType
         }
-    
-        if (data.role.data == 'user' && data.staffType.index == 0) {
+
+        /* if (data.role.data == 'user' && data.staffType.index == 0) {
             data.contract = req.body.contract
             data.object = req.body.object
             data.supervisor = req.body.supervisor
             data.regional = req.body.regional
             data.institute = req.body.institute
-        }
-    
+        } */
+
         // Encuentra el usuario por ID y actualiza los datos, excluyendo la contraseña
-        await User.findByIdAndUpdate(req.params.id, data, { new: true }, (err, user) => {
-            if (err) {
-                console.log(err);
-                return res.status(400).json({ msg: 'Error, Usuario no actualizado' });
-            }
-            return res.status(200).json({ msg: 'Usuario actualizado', user });
-        });
+        try {
+            const updatedUser = await User.findOneAndUpdate(
+                { _id: userId },
+                {
+                    $set: data
+                },
+                { new: true }
+            );
+
+            res.status(200).json({ msg: 'Usuario actualizada exitosamente', user: updatedUser });
+
+        } catch (error) {
+            console.log(error);
+            res.status(502).json({ msg: 'ha ocurrido un error al momento de hacer el cambio' });
+            return error
+        }
+
     },
 
     postUpload: async (req, res) => {
