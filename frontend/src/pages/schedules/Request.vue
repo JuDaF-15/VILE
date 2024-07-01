@@ -1,6 +1,7 @@
 <template>
     <q-page class="q-pa-md">
         <div class="text-h4 text-center q-mb-md">Solicitudes</div>
+
         <div v-if="!showPreview" class="row justify-center q-mt-md">
             <div class="col-8" style="width: 90%;">
                 <!-- <q-table class="my-sticky-header-table" :filter="filter" :columns="columns" :rows="rows">
@@ -96,20 +97,21 @@
                 </q-table> -->
 
                 <!-- TABLA MIA -->
-                <q-table :loading="cargando" class="my-sticky-header-table" :filter="filter" :columns="columns" :rows="rows">
+                <q-table :loading="cargando" class="my-sticky-header-table" :filter="filter" :columns="columns"
+                    :rows="rows">
                     <template v-slot:body-cell-opciones="props">
                         <q-td :props="props">
                             <q-icon @click="function () {
-            row = props.row
+                                row = props.row
 
-            console.log(row)
+                                console.log(row)
 
-            if (props.row.typeSchedule !== 'contractor') {
-                showOther = true
-            }
+                                if (props.row.typeSchedule !== 'contractor') {
+                                    showOther = true
+                                }
 
-            showPreview = true
-        }" name="fa-solid fa-eye" size="20px" color="blue">
+                                showPreview = true
+                            }" name="fa-solid fa-eye" size="20px" color="blue">
                                 <q-tooltip>
                                     Ver y Firmar
                                 </q-tooltip>
@@ -210,16 +212,24 @@
             </div>
         </div>
         <div v-else class="row justify-center q-my-md">
-            <div class="col-6 q-mb-md">
-                <q-btn @click="row = null; showOther = false; showPreview = false" label="Atrás"
+
+            <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
+                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+            </div>
+
+            <div class="col-8 justify-end  flex q-mb-md">
+                <q-btn @click="row = null; showOther = false; showPreview = false" icon="fa-solid fa-arrow-left" label="Atrás"
                     class="bg-green text-white" />
             </div>
 
             <div class="col-12" />
 
-            <Preview v-if="!showOther" :row="row" />
+            <div id="descargar">
+                <Preview v-if="!showOther" :row="row" />
 
-            <OtherPreview v-else :row="row" />
+                <OtherPreview v-else :row="row" />
+            </div>
+
 
             <div class="col-12" />
 
@@ -239,8 +249,7 @@
                     </div>
 
                     <div align="right" class="col-12 q-pa-sm">
-                        <q-btn @click="updateSchedule(row._id)" label="Crear Legalización"
-                            class="bg-green text-white" />
+                        <q-btn @click="updateSchedule(row._id)" label="Crear Legalización" class="bg-green text-white" />
                     </div>
                 </div>
             </div>
@@ -265,10 +274,25 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
 import { useScheduleStore } from '../../stores/schedule.js'
-
 import { showNotify } from '../../components/notify.js'
-
 import { useUserStore } from '../../stores/user.js'
+
+/* import html2pdf from 'html2pdf.js'
+
+function generatePDF() {
+    html2pdf(document.getElementById('element'),{
+        margin: 10,
+        filename: 'downloaded'
+    })
+}
+
+function generatePDF_publicworker() {
+    html2pdf(document.getElementById('element2'),{
+        margin: 10,
+        filename: 'downloaded'
+    })
+} */
+
 
 import Preview from './contractor/Preview.vue'
 
@@ -283,6 +307,17 @@ const userStore = useUserStore()
 const $q = useQuasar()
 
 let cargando = ref(false)
+
+function imprimirPagina() {
+
+    const printableContent = document.getElementById('descargar').innerHTML;
+    const originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = printableContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
+}
 
 
 onBeforeMount(async () => {
@@ -324,6 +359,7 @@ async function getSign() {
             signature.supervisor = data.sign.url
 
             await scheduleStore.putSchedule({
+                userId: user.value.id,
                 signature: signature,
                 status: {
                     index: 2,
@@ -341,6 +377,7 @@ async function getSign() {
             signature.paymaster = data.sign.url
 
             await scheduleStore.putSchedule({
+                userId: user.value.id,
                 signature: signature,
                 status: {
                     index: 3,
@@ -356,7 +393,9 @@ async function getSign() {
 
         row.value = null
 
-        showNotify('Agenda firmada', 'positive', '')
+        imprimirPagina()
+
+        showNotify('Agenda firmada', 'positive', 'check')
 
         showPreview.value = false
     } else {
@@ -419,7 +458,7 @@ const columns = ref([
     },
     {
         name: 'opciones',
-        label: 'Opciones',
+        label: 'Acciones',
         align: 'center'
     }
 ])
@@ -427,6 +466,7 @@ const columns = ref([
 async function updateSchedule(id) {
     if (showReject.value) {
         await scheduleStore.putSchedule({
+            userId: user.value.id,
             status: {
                 index: 0,
                 data: 'Agenda rechazada',
@@ -453,8 +493,9 @@ async function updateSchedule(id) {
             })
         }
 
+        console.log(user.value._id),
 
-        showReject.value = false
+            showReject.value = false
 
         row.value = null
 
@@ -481,6 +522,9 @@ async function updateSchedule(id) {
             tripOrder.value = null
 
             showPreview.value = false
+
+            showNotify('Legalización creada', 'positive', 'check')
+
         } else {
             showNotify(`Digite el número ${row.value.typeSchedule == 'contractor' ? 'Orden de Viaje' : 'Comisión de Servicios'}`, 'negative')
             showReject.value = false

@@ -18,7 +18,7 @@
                 </router-link>
             </q-card>
 
-            <q-card v-if="dataUser === 'contractor'" class="my-card" id="cardP">
+            <q-card v-if="dataUser === 0" class="my-card" id="cardP">
                 <router-link to="agenda/contratista/crear" class="cardP">
                     <q-card-section>
                         <div class="text-h6" id="name">Agendas</div>
@@ -69,7 +69,7 @@
             </q-card>
 
             <!-- funcionario -->
-            <q-card v-if="role === 'Supervisor' || dataUser !== 'contractor' && role !== 'Ordenador' && role !== 'Administrador'" class="my-card"
+            <q-card v-if="dataUser === 1 || role === 'Supervisor'" class="my-card"
                 id="cardP">
                 <router-link to="agenda/funcionario/crear" class="cardP">
                     <q-card-section>
@@ -123,7 +123,7 @@ onBeforeMount(async () => {
     //console.log(currentUser);
     role.value = currentUser.value.role.label
     user.value = await userStore.getUserParams(currentUser.value.id)
-    dataUser.value = user.value.data.staffType.data
+    dataUser.value = user.value.data.staffType.index
 })
 
 console.log(dataUser);

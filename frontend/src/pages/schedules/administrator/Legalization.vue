@@ -213,7 +213,11 @@
                 <!-- FIN TABLA MIA -->
             </div>
 
-            <div v-if="showPreview" class="col-8 q-mb-sm">
+            <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
+                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+            </div>
+
+            <div v-if="showPreview" class="col-8 justify-end  flex q-mb-md">
                 <q-btn @click="function () {
                 if (user.role.data == 'user' || row.typeSchedule == 'commission' && user.role.data !== 'administrator') {
                     showPreview = false
@@ -223,13 +227,13 @@
                     showPreview = false
                     showOther = false
                 }
-            }" label="Atrás" class="bg-red text-white" />
+            }" label="Atrás" icon="fa-solid fa-arrow-left" class="bg-red text-white" />
             </div>
 
             <div class="col-12" />
 
-            <div v-if="showPreview" class="col-12">
-                <div class="row justify-center">
+            <div v-if="showPreview">
+                <div id="descargar">
                     <Preview v-if="!showOther" :row="row" />
 
                     <OtherPreview v-if="showOther" :row="row" />
@@ -260,7 +264,7 @@
                     <q-card-section class="justify-between flex bg-primary">
                         <p v-text="'Crear Legalización'" class="q-my-none text-white" style="font-size: 25px;" />
 
-                        <q-btn @click="getPreview()" label="Vista Previa" class="bg-white text-primary" />
+                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye" class="bg-white text-primary" />
                     </q-card-section>
 
                     <q-space />
@@ -402,7 +406,7 @@
                             <template v-for="(element, index) in conclusions">
                                 <div class="row q-mt-sm">
                                     <div class="col-10 q-px-sm">
-                                        <q-input v-model="element.data" filled stack-label label="Conclusión" />
+                                        <q-input type="textarea" v-model="element.data" filled stack-label label="Conclusión" />
                                     </div>
 
                                     <div v-if="index !== 0" class="col-2 items-center flex">
@@ -471,6 +475,17 @@ import Preview from './Preview.vue'
 import OtherPreview from '../public/Preview.vue'
 
 let cargando = ref(false)
+
+function imprimirPagina() {
+
+const printableContent = document.getElementById('descargar').innerHTML;
+const originalContent = document.body.innerHTML;
+
+document.body.innerHTML = printableContent;
+window.print();
+document.body.innerHTML = originalContent;
+window.location.reload();
+}
 
 onBeforeMount(async function () {
     user.value = $q.localStorage.getItem('user')
@@ -630,7 +645,7 @@ const columns = ref([
     {
         name: 'opciones',
         field: 'opciones',
-        label: 'Opciones',
+        label: 'Acciones',
         align: 'center'
     }
 ])

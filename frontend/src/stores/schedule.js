@@ -40,11 +40,24 @@ export const useScheduleStore = defineStore('Schedules', {
         },
 
         async postSchedule(data) {
-            await instance({
-                method: 'post',
-                url: '/schedule',
-                data: data
-            })
+            try {
+                const response = await instance({
+                    method: 'post',
+                    url: '/schedule',
+                    data: data
+                })
+
+                if (response) {
+                    const { data, status } = response
+
+                    return { data, status }
+                }
+            } catch (error) {
+                const { data, status } = error.response
+
+                return { data, status }
+            }
+
         },
 
         async putSchedule(data, id) {

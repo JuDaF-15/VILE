@@ -8,6 +8,7 @@ const schemaShedule = new mongoose.Schema({
     supervisor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
     contract: {
+        mail: { type: String },
         number: { type: String },
         date: {
             start: { type: Date },
@@ -80,7 +81,7 @@ const schemaShedule = new mongoose.Schema({
     ],
 
     activities: [
-        { items: [ { data: { type : String }, time: { type: String} } ], date: { type: String } }
+        { items: [{ data: { type: String }, time: { type: String } }], date: { type: String } }
     ],
 
     signature: {
@@ -115,7 +116,7 @@ const schemaShedule = new mongoose.Schema({
     ],
 
     collections: [
-        { name: { type: String }, items: [ { url: { type: String }, public_id: { type: String } }]}
+        { name: { type: String }, items: [{ url: { type: String }, public_id: { type: String } }] }
     ],
 
     conclusions: [
@@ -123,7 +124,7 @@ const schemaShedule = new mongoose.Schema({
     ],
 
     tempUrl: [
-        { url: {type: String}, folder: {type: String}, public_id: { type: String} }
+        { url: { type: String }, folder: { type: String }, public_id: { type: String } }
     ]
 })
 

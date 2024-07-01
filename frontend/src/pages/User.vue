@@ -5,16 +5,13 @@
 
             <!-- tabla -->
             <div class="col-10">
-                <q-table class="my-sticky-header-table" :filter="filter" :columns="columns" :rows="rows">
-                    <template v-slot:body-cell-options="props">
-                        <!-- <td :props="props" class="justify-center flex">
-                            <q-btn @click="cleanDialog(); showEdit(props.row)" label="Editar" style="font-size: 12px;" />
-                        </td> -->
-                    </template>
+                <q-table :loading="cargando" class="my-sticky-header-table" :filter="filter" :columns="columns"
+                    :rows="rows">
+
                     <template v-slot:body-cell-opciones="props">
                         <q-td :props="props">
                             <q-icon color="orange" name="fa-solid fa-pen-to-square fa-xl" size="20px"
-                                style="margin-right: 10px; cursor: pointer" @click="editarUsuario(props.row)">
+                                style="margin-right: 10px; cursor: pointer" @click="abrirEditar(props.row)">
                                 <q-tooltip>
                                     Editar Usuario
                                 </q-tooltip>
@@ -46,8 +43,7 @@
                     </template>
 
                     <template v-slot:top-left>
-                        <q-btn @click="cleanDialog(); edit = false; showDialog = true" icon="add" color="primary"
-                            label="Crear" />
+                        <q-btn @click="showDialog = true; nuevo()" icon="add" color="primary" label="Crear" />
                     </template>
 
                     <template v-slot:body-cell-estado="props">
@@ -63,14 +59,15 @@
             <q-dialog v-model="showDialog">
                 <q-card style="width: 700px;">
                     <q-card-section class="justify-start flex bg-primary">
-                        <p v-text="edit == true ? 'Editar Usuario' : 'Crear Usuario'" class="q-my-none text-white"
-                            style="font-size: 25px;" />
+                        <div class="text-h6" style="color: white;">
+                            {{ bd === 0 ? "Editar Usuario" : "Agregar Usuario" }}
+                        </div>
                     </q-card-section>
                     <q-card-section>
                         <div class="row">
                             <div class="col-12 q-pa-sm">
-                                <q-select filled stack-label label="Rol" v-model="role"
-                                    :options="edit == true ? editOptionRole : optionsRole" @update:model-value="async (val) => {
+                                <q-select filled stack-label label="Rol" v-model="role" :options="optionsRole"
+                                    @update:model-value="async (val) => {
                                         staffType = null
                                     }" />
                             </div>
@@ -93,53 +90,59 @@
                                     label="No. Identificación" />
                             </div>
 
-                            <div v-if="role !== null && role.index !== 3 || staffType !== null && staffType.index == 1"
-                                class="col-12 q-pa-sm">
+                            <div v-if="bd === 1" class="col-12 q-pa-sm">
                                 <q-input filled stack-label v-model="password" label="Contraseña" />
                             </div>
 
-
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
                                 <q-select v-model="regional" :options="regionalOptions" use-chips filled stack-label
                                     label="Regional" @update:model-value="async function (value) {
                                         await getInstitute(value)
                                     }" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
-                                <q-select v-model="institute" :options="instituteOptions" filled stack-label
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
+                                <q-select v-model="institute" :options="instituteOptions" use-chips filled stack-label
                                     label="Centro" />
                             </div>
 
-                            <div v-if="role !== null && role.index !== 3 && role.index !== 1 || staffType !== null && staffType.index == 1"
+                            <div v-if="role !== null && role.index !== 3 && role.index !== 1 || staffType !== null && staffType.index == 1 && role.index == 3"
                                 class="col-12 q-pa-sm">
                                 <q-input filled stack-label v-model="position" label="Cargo" />
                             </div>
 
-                            <div v-if="role !== null && role.index == 0 || staffType !== null && staffType.index == 1"
+                            <div v-if="role !== null && role.index == 0 || (staffType !== null && staffType.index == 1 && role.index == 3)"
                                 class="col-12 q-pa-sm">
                                 <q-input v-model="branch" filled stack-label label="Dependencia" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
-                                <q-input v-model="contractNumber" filled stack-label label="Número Contrato" />
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
+                                <q-input v-model="contractNumber" filled stack-label type="number"
+                                    label="Número Contrato" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
                                 <q-input v-model="contractDate.start" filled stack-label label="Fecha Inicio Contrato"
                                     type="date" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
                                 <q-input v-model="contractDate.end" filled stack-label label="Fecha Fin Contrato"
                                     type="date" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
                                 <q-input v-model="object" autogrow filled stack-label label="Objeto" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0" class="col-12 q-pa-sm">
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
                                 <q-select v-model="supervisor" :options="supervisorOptions" filled stack-label
                                     label="Supervisor" />
                             </div>
@@ -155,7 +158,8 @@
 
                     <q-card-actions class="justify-around flex">
                         <q-btn @click="showDialog = false" color="negative" label="Cerrar" />
-                        <q-btn color="primary" @click="edit == true ? editUser() : createUser()" label="Guardar" />
+                        <q-btn color="primary" :loading="loading" @click="bd === 0 ? editUser() : createUser()"
+                            label="Guardar" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -174,13 +178,17 @@ import { showNotify } from '../components/notify.js'
 
 import { useQuasar } from "quasar";
 
-
+let cargando = ref(false)
+let loading = ref(false)
 const userStore = useUserStore()
 let filter = ref('')
 const scheduleStore = useScheduleStore()
+let bd = ref("");
 
 onBeforeMount(
     async () => {
+        cargando.value = true
+
         rows.value = await getUser()
 
         paymasterOptions.value = await getUser({ paymaster: true })
@@ -188,6 +196,9 @@ onBeforeMount(
         regionalOptions.value = await getRegional()
 
         supervisorOptions.value = await getUser({ supervisor: true })
+
+        cargando.value = false
+
     }
 )
 
@@ -226,7 +237,9 @@ async function getUser(query = {}) {
         const user = []
 
         for (let index = 0; index < data.length; index++) {
-            user.push({ label: data[index].name, id: data[index]._id })
+            if (data[index].status === 1) {
+                user.push({ label: data[index].name, id: data[index]._id });
+            }
         }
 
         return user
@@ -236,8 +249,51 @@ async function getUser(query = {}) {
 }
 
 async function createUser() {
-    if (name.value == null) {
+    loading.value = true
+
+    const emailValido = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+
+    if (!role.value) {
+        showNotify('Asigne un rol', 'negative')
+    } else if (role.value.index === 3 && !staffType.value) {
+        showNotify('Seleccione el tipo de usuario', 'negative')
+    } else if (!name.value.trim()) {
         showNotify('Digite el Nombre', 'negative')
+    } else if (!mail.value.trim()) {
+        showNotify('Digite el correo', 'negative')
+    } else if (!emailValido.test(mail.value.trim())) {
+        showNotify('El correo no es válido', 'negative')
+    } else if (!identification.value) {
+        showNotify('Digite la cédula/identificación', 'negative')
+    } else if (!password.value.trim()) {
+        showNotify('Digite la contraseña', 'negative')
+    } else if ((role.value.data === 'paymaster' && !position.value.trim())
+        || (role.value.data === 'supervisor' && !position.value.trim())
+        || (role.value.index === 3 && staffType.value?.data === 'publicWorker' && !position.value.trim())) {
+        showNotify('Digite el cargo', 'negative')
+    } else if ((role.value.data === 'supervisor' && !branch.value.trim()) ||
+        (role.value.index === 3 && staffType.value?.data === 'publicWorker' && !branch.value.trim())) {
+        showNotify('Digite la dependencia', 'negative')
+    } else if ((role.value.data === 'supervisor' || staffType.value?.data === 'publicWorker' || staffType.value?.data === 'contractor') && !paymaster.value) {
+        showNotify('Seleccione un ordenador del gasto', 'negative')
+    } else if ((staffType.value?.data === 'contractor') && !supervisor.value) {
+        showNotify('Seleccione un supervisor', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && !regional.value) {
+        showNotify('Seleccione la regional', 'negative')
+    } else if (staffType.value?.data === 'contractor' && !institute.value) {
+        showNotify('Seleccione el centro de formación', 'negative')
+    } else if (staffType.value?.data === 'contractor' && !contractNumber.value) {
+        showNotify('Digite el número de contrato', 'negative')
+    } else if (staffType.value?.data === 'contractor' && !contractDate.value.start) {
+        showNotify('Seleccione la fecha de inicio', 'negative')
+    } else if (staffType.value?.data === 'contractor' && !contractDate.value.end) {
+        showNotify('Seleccione la fecha de fin', 'negative')
+    } else if (staffType.value?.data === 'contractor' && contractDate.value.end < contractDate.value.start) {
+        showNotify('La fecha de fin de contrato debe ser mayor a la fecha de inicio', 'negative')
+    } else if (staffType.value?.data === 'contractor' && contractDate.value.start > contractDate.value.end) {
+        showNotify('La fecha de inicio de contrato debe ser menor a la fecha de fin', 'negative')
+    } else if (staffType.value?.data === 'contractor' && !object.value.trim()) {
+        showNotify('Digite el objeto', 'negative')
     } else {
         const body = {
             role: role.value,
@@ -268,7 +324,7 @@ async function createUser() {
             if (status !== 200) {
                 showNotify(data.msg, 'negative')
             } else {
-                showNotify(data.msg, 'positive', '')
+                showNotify(data.msg, 'positive', 'check')
 
                 rows.value = await getUser()
 
@@ -277,34 +333,35 @@ async function createUser() {
         }
 
     }
+    loading.value = false
 }
 
 async function cleanDialog() {
-    id.value = null
-    name.value = null
-    mail.value = null
-    identification.value = null
-    password.value = null
-    role.value = null
+    id.value = ''
+    name.value = ''
+    mail.value = ''
+    identification.value = ''
+    password.value = ''
+    role.value = ''
     editOptionRole.value = []
 
-    branch.value = null
-    contractNumber.value = null
+    branch.value = ''
+    contractNumber.value = ''
     contractDate.value = {
         start: '',
         end: ''
     }
 
-    staffType.value = null
-    supervisor.value = null
+    staffType.value = ''
+    supervisor.value = ''
 
-    institute.value = null
-    regional.value = null
+    institute.value = ''
+    regional.value = ''
 
-    object.value = null
+    object.value = ''
 
-    position.value = null
-    paymaster.value = null
+    position.value = ''
+    paymaster.value = ''
 
     rows.value = await getUser()
 
@@ -315,6 +372,12 @@ async function cleanDialog() {
     paymasterOptions.value.splice(0)
 
     paymasterOptions.value = await getUser({ paymaster: true })
+}
+
+
+function nuevo() {
+    bd.value = 1;
+    cleanDialog();
 }
 
 const $q = useQuasar()
@@ -329,7 +392,7 @@ async function editarEstado(x) {
         await userStore.cambiarEstado(x._id, x.status);
         $q.notify({
             message: "Estado editado exitosamente",
-            color: "green",
+            color: "positive",
             icon: "check",
             position: "bottom",
             timeout: 3000,
@@ -339,61 +402,132 @@ async function editarEstado(x) {
     }
 }
 
-function showEdit(data) {
-    edit.value = true
-
+function abrirEditar(data) {
+    bd.value = 0
     console.log(data)
-
-    if (data.role.index == 1) {
-        editOptionRole.value = [
-            { label: 'Administrador', data: 'administrator', index: 1 }
-        ]
-    }
-
-    if (data.role.index == 0) {
-        editOptionRole.value = [
-            { label: 'Supervisor', data: 'supervisor', index: 0 },
-            { label: 'Usuario', data: 'user', index: 3 }
-        ]
-    }
-
-    if (data.role.index == 2) {
-        editOptionRole.value = [
-            { label: 'Ordenador', data: 'paymaster', index: 2 }
-        ]
-    }
-
-    if (data.role.index == 3) {
-        editOptionRole.value = [
-            { label: 'Supervisor', data: 'supervisor', index: 0 },
-            { label: 'Usuario', data: 'user', index: 3 }
-        ]
-    }
 
     id.value = data._id
     name.value = data.name
+    mail.value = data.mail
+    identification.value = data.identification
     role.value = optionsRole.value[data.role.index],
         position.value = data.position
+
+    if (data.role.index === 1) {
+        editOptionRole.value = [
+            { label: 'Administrador', data: 'administrator', index: 1 }
+        ]
+    } else if (data.role.index === 0) {
+        paymaster.value = data.paymaster.name
+        branch.value = data.branch
+        editOptionRole.value = [
+            { label: 'Supervisor', data: 'supervisor', index: 0 },
+            { label: 'Usuario', data: 'user', index: 3 }
+        ]
+    } else if (data.role.index === 2) {
+        editOptionRole.value = [
+            { label: 'Ordenador', data: 'paymaster', index: 2 }
+        ]
+    } else if (data.role.index === 3 && data.staffType.data === "publicWorker") {
+        staffType.value = staffOptions.value[data.staffType.index],
+            position.value = data.position
+        branch.value = data.branch
+        paymaster.value = data.paymaster.name
+        editOptionRole.value = [
+            { label: 'Ordenador', data: 'paymaster', index: 2 },
+            { label: 'Usuario', data: 'user', index: 3 }
+        ]
+    } else if (data.role.index === 3 && data.staffType.data === "contractor") {
+        staffType.value = staffOptions.value[data.staffType.index],
+            regional.value = data.regional.name
+        institute.value = data.institute.name
+        contractNumber.value = data.contract.number
+        contractDate.value.start = data.contract.date.start
+        contractDate.value.end = data.contract.date.end
+        object.value = data.object
+        paymaster.value = data.paymaster.name
+        supervisor.value = data.supervisor.name
+        editOptionRole.value = [
+            { label: 'Supervisor', data: 'supervisor', index: 0 },
+            { label: 'Usuario', data: 'user', index: 3 }
+        ]
+    }
     showDialog.value = true
+
 }
 
 async function editUser() {
-    const { data, status } = await userStore.putUser(id.value, {
-        name: name.value,
-        role: role.value,
-        position: role.value.index == 1 ? '' : position.value,
-    })
+    loading.value = true
 
-    if (status == 200) {
-        showNotify(data.msg, 'positive', '')
+    const emailValido = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
 
-        cleanDialog()
+    if (!role.value) {
+        showNotify('Asigne un rol', 'negative')
+    } else if (!name.value.trim()) {
+        showNotify('Digite el Nombre', 'negative')
+    } else if (!mail.value.trim()) {
+        showNotify('Digite el correo', 'negative')
+    } else if (!emailValido.test(mail.value.trim())) {
+        showNotify('El correo no es válido', 'negative')
+    } else if (!identification.value) {
+        showNotify('Digite la cédula/identificación', 'negative')
+    } else if ((role.value.data === 'paymaster' && !position.value.trim())
+        || (role.value.data === 'supervisor' && !position.value.trim())
+        || (role.value.index === 3 && staffType.value.data === 'publicWorker' && !position.value.trim())) {
+        showNotify('Digite el cargo', 'negative')
+    } else if ((role.value.data === 'supervisor' && !branch.value.trim()) ||
+        (role.value.index === 3 && staffType.value?.data === 'publicWorker' && !branch.value.trim())) {
+        showNotify('Digite la dependencia', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && !regional.value) {
+        showNotify('Seleccione la regional', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && !institute.value) {
+        showNotify('Seleccione el centro de formación', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && !contractNumber.value) {
+        showNotify('Digite el número de contrato', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && contractDate.value.end < contractDate.value.start) {
+        showNotify('La fecha de fin de contrato debe ser mayor a la fecha de inicio', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && contractDate.value.start > contractDate.value.end) {
+        showNotify('La fecha de inicio de contrato debe ser menor a la fecha de fin', 'negative')
+    } else if (role.value.index === 3 && staffType.value?.data === 'contractor' && !object.value.trim()) {
+        showNotify('Digite el objeto', 'negative')
+    } else {
+        const body = {
+            role: role.value,
+            name: name.value,
+            mail: mail.value,
+            identification: identification.value,
+            position: position.value,
+            branch: branch.value,
+            paymaster: paymaster.value !== null ? paymaster.value.id : null,
+            staffType: staffType.value
+        }
 
-        rows.value = await getUser()
+        if (role.value !== null) {
+            if (role.value.index == 3 && staffType.value !== null && staffType.value.index == 0) {
+                body.contract = {
+                    number: contractNumber.value,
+                    date: contractDate.value
+                }
+                body.object = object.value
+                body.institute = institute.value !== null ? institute.value.data : null,
+                    body.regional = regional.value !== null ? regional.value.data : null,
+                    body.supervisor = supervisor.value !== null ? supervisor.value.id : null
+            }
+        }
+
+        const { data, status } = await userStore.putUser(body, id.value)
+
+        if (status !== 200) {
+            showNotify(data.msg, 'negative')
+        } else {
+            showNotify(data.msg, 'positive', 'check')
+
+            rows.value = await getUser()
+
+            showDialog.value = false
+        }
     }
-    edit.value = false
-
-    showDialog.value = false
+    loading.value = false
 }
 
 const columns = ref([
@@ -409,6 +543,13 @@ const columns = ref([
         label: 'Correo Electrónico',
         align: 'center',
         field: 'mail'
+    },
+
+    {
+        name: 'identification',
+        label: 'Cédula',
+        align: 'center',
+        field: 'identification'
     },
 
     {
@@ -444,8 +585,6 @@ const branch = ref(null)
 
 // dialog
 const showDialog = ref(false)
-
-const edit = ref(false)
 
 const id = ref(null)
 
@@ -501,4 +640,7 @@ const supervisorOptions = ref([])
 const paymaster = ref(null)
 
 const paymasterOptions = ref([])
+
+console.log(paymasterOptions);
+
 </script>

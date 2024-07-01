@@ -88,7 +88,7 @@ async function cambioContrasena() {
             );
             $q.notify({
                 message: envio.data.msg,
-                color: "green",
+                color: "positive",
                 icon: "check",
                 position: "top",
                 timeout: 3000,

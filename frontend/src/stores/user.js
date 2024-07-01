@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 import { instance } from './index.js'
 
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from 'jwt-decode'
 
 export const useUserStore = defineStore('User', {
     state: () => ({}),
@@ -98,7 +98,7 @@ export const useUserStore = defineStore('User', {
             }
         },
 
-        async putUser(id, data) {
+        async putUser(data, id) {
             try {
                 const response = await instance({
                     method: 'put',
@@ -112,7 +112,9 @@ export const useUserStore = defineStore('User', {
                     return { data, status }
                 }
             } catch (error) {
-                console.log(error)
+                const { data, status } = error.response
+
+                return { data, status }
             }
         },
 

@@ -73,7 +73,7 @@
                 </q-table> -->
 
                 <!-- TABLA MIA -->
-                <q-table class="my-sticky-header-table" :rows="rows" :columns="columns" row-key="name" :filter="filter">
+                <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name" :filter="filter">
                     <template v-slot:top-right>
                         <q-input dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
                             <template v-slot:append>
@@ -157,19 +157,26 @@
             </div>
 
             <!-- preview -->
+            <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
+                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+            </div>
+
+            <!-- preview -->
             <div v-show="showPreview" class="col-sm-8 col-lg-6 justify-end flex q-mb-md" style="font-size: 12px;">
-                <q-btn @click="showPreview = false; showDialog = true" label="Continuar Creación"
+                <q-btn @click="showPreview = false; showDialog = true" icon="fa-solid fa-arrow-right" label="Continuar Creación"
                     class="bg-green text-white" />
             </div>
 
             <div v-show="showPreview" class="col-12" />
 
-            <Preview v-if="showPreview == true" :row="row" />
+            <div id="descargar" style="width:65%">
+                <Preview v-if="showPreview == true" :row="row" />
 
-            <div v-show="showPreview" class="col-12" />
+                <div v-show="showPreview" class="col-12" />
 
-            <div v-show="showPreview" class="col-sm-8 col-lg-6 justify-end flex">
-                <p class="q-my-none q-mr-sm q-mb-sm" style="font-size: 12px;">GTH-F-090 V.03</p>
+                <div v-show="showPreview" class="col-sm-8 col-lg-6 justify-end flex">
+                    <p class="q-my-none q-mr-sm q-mb-sm" style="font-size: 12px;">GTH-F-090 V.03</p>
+                </div>
             </div>
 
             <!-- dialog -->
@@ -177,7 +184,7 @@
                 <q-card style="width: 700px;">
                     <q-card-section class="bg-primary justify-between flex z-top" style="position: sticky; top: 0;">
                         <p v-text="labelDialog" class="q-my-none text-white" style="font-size: 25px;" />
-                        <q-btn @click="getPreview()" label="Vista Previa" class="bg-white text-primary" />
+                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye" class="bg-white text-primary" />
                     </q-card-section>
 
                     <q-space />
@@ -189,9 +196,10 @@
                                     <template v-slot:default>
                                         <div class="row">
                                             <div class="col-12">
-                                                <p class="q-my-none text-white items-center flex"
-                                                    style="font-size: 18px;"><q-icon name="error_outline" size="24px"
-                                                        class="text-white" />Agenda Rechazada</p>
+                                                <p class="q-my-none text-white items-center flex" style="font-size: 18px;">
+                                                    <q-icon name="error_outline" size="24px" class="text-white" />Agenda
+                                                    Rechazada
+                                                </p>
                                             </div>
 
                                             <div class="col-12">
@@ -250,42 +258,41 @@
                                                         :options="gocountyOptions" label="Departamento"
                                                         @filter="function (val, update) { update(() => { gocountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
                                                         @update:model-value="async (value) => {
-                if (value) {
-                    maingoCity = await getCity([value]); gocityOptions = await getCity([value]); goCity = null; loadingCity = false;
-                } else {
-                    goCity = null
-                    maingoCity.splice(0)
-                    gocityOptions.splice(0)
-                }
-            }" />
+                                                            if (value) {
+                                                                maingoCity = await getCity([value]); gocityOptions = await getCity([value]); goCity = null; loadingCity = false;
+                                                            } else {
+                                                                goCity = null
+                                                                maingoCity.splice(0)
+                                                                gocityOptions.splice(0)
+                                                            }
+                                                        }" />
                                                 </div>
 
                                                 <div class="col-12 q-pa-sm">
                                                     <q-select filled stack-label use-input
-                                                        :disable="goOther !== null || loadingCity"
-                                                        :loading="loadingCity" v-model="goCity" :options="gocityOptions"
-                                                        label="Municipio"
+                                                        :disable="goOther !== null || loadingCity" :loading="loadingCity"
+                                                        v-model="goCity" :options="gocityOptions" label="Municipio"
                                                         @filter="function (val, update) { update(() => { gocityOptions = maingoCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
                                                 </div>
                                             </div>
                                             <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
                                                 <q-btn @click="() => {
-                if (goOther !== null && goOther !== '') {
-                    goRoute.push({ data: goOther, id: null })
-                } else if (goCity !== null) {
-                    goRoute.push({ data: goCity.label, id: goCity.data })
-                }
-                goOther = null
+                                                    if (goOther !== null && goOther !== '') {
+                                                        goRoute.push({ data: goOther, id: null })
+                                                    } else if (goCity !== null) {
+                                                        goRoute.push({ data: goCity.label, id: goCity.data })
+                                                    }
+                                                    goOther = null
 
-                goCounty = null
+                                                    goCounty = null
 
-                gocityOptions.splice(0)
-                maingoCity.splice(0)
+                                                    gocityOptions.splice(0)
+                                                    maingoCity.splice(0)
 
-                goCity = null
+                                                    goCity = null
 
-                savegoOption = false
-            }" label="AGREGAR" class="bg-primary text-white" />
+                                                    savegoOption = false
+                                                }" label="AGREGAR" class="bg-primary text-white" />
                                             </div>
                                         </q-menu>
                                     </div>
@@ -324,14 +331,14 @@
 
                                             <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
                                                 <q-btn @click="() => {
-                if (temporarygoMeanstransport !== null) {
-                    goMeanstransport.push({ data: temporarygoMeanstransport.label })
+                                                    if (temporarygoMeanstransport !== null) {
+                                                        goMeanstransport.push({ data: temporarygoMeanstransport.label })
 
-                    temporarygoMeanstransport = null
-                }
+                                                        temporarygoMeanstransport = null
+                                                    }
 
-                savegoMeanstransport = false
-            }" label="AGREGAR" class="bg-primary text-white" />
+                                                    savegoMeanstransport = false
+                                                }" label="AGREGAR" class="bg-primary text-white" />
                                             </div>
                                         </q-menu>
                                     </div>
@@ -375,15 +382,15 @@
                                                         :options="returncountyOptions" label="Departamento"
                                                         @filter="function (val, update) { update(() => { returncountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
                                                         @update:model-value="async (value) => {
-                if (value) {
-                    mainreturnCity = await getCity([value]); returncityOptions = await getCity([value]); returnCity = null; loadingCity = false
-                } else {
-                    returnCity = null
+                                                            if (value) {
+                                                                mainreturnCity = await getCity([value]); returncityOptions = await getCity([value]); returnCity = null; loadingCity = false
+                                                            } else {
+                                                                returnCity = null
 
-                    mainreturnCity.splice(0)
-                    returncityOptions.splice(0)
-                }
-            }" />
+                                                                mainreturnCity.splice(0)
+                                                                returncityOptions.splice(0)
+                                                            }
+                                                        }" />
                                                 </div>
                                                 <div class="col-12 q-pa-sm">
                                                     <q-select filled stack-label use-input
@@ -395,22 +402,22 @@
                                             </div>
                                             <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
                                                 <q-btn @click="() => {
-                if (returnOther !== null && returnOther !== '') {
-                    returnRoute.push({ data: returnOther, id: null })
-                } else if (returnCity !== null) {
-                    returnRoute.push({ data: returnCity.label, id: returnCity.data })
-                }
-                returnOther = null
+                                                    if (returnOther !== null && returnOther !== '') {
+                                                        returnRoute.push({ data: returnOther, id: null })
+                                                    } else if (returnCity !== null) {
+                                                        returnRoute.push({ data: returnCity.label, id: returnCity.data })
+                                                    }
+                                                    returnOther = null
 
-                returnCounty = null
+                                                    returnCounty = null
 
-                mainreturnCity.splice(0)
-                returncityOptions.splice(0)
+                                                    mainreturnCity.splice(0)
+                                                    returncityOptions.splice(0)
 
-                returnCity = null
+                                                    returnCity = null
 
-                savereturnOption = false
-            }" label="AGREGAR" class="bg-primary text-white" />
+                                                    savereturnOption = false
+                                                }" label="AGREGAR" class="bg-primary text-white" />
                                             </div>
                                         </q-menu>
                                     </div>
@@ -449,14 +456,14 @@
                                             </div>
                                             <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
                                                 <q-btn @click="() => {
-                if (temporaryreturnMeanstransport !== null) {
-                    returnMeanstransport.push({ data: temporaryreturnMeanstransport.label })
+                                                    if (temporaryreturnMeanstransport !== null) {
+                                                        returnMeanstransport.push({ data: temporaryreturnMeanstransport.label })
 
-                    temporaryreturnMeanstransport = null
-                }
+                                                        temporaryreturnMeanstransport = null
+                                                    }
 
-                savereturnMeanstransport = false
-            }" label="AGREGAR" class="bg-primary text-white" />
+                                                    savereturnMeanstransport = false
+                                                }" label="AGREGAR" class="bg-primary text-white" />
                                             </div>
                                         </q-menu>
                                     </div>
@@ -468,21 +475,20 @@
                                     :disable="place.length !== 0 || loadingCounty" :loading="loadingCounty"
                                     v-model="regional" :options="regionalOptions" label="Dirección General / Regional"
                                     @filter="function (val, update, abort) {
-                update(() => {
-                    const needle = val.toLowerCase()
+                                        update(() => {
+                                            const needle = val.toLowerCase()
 
-                    regionalOptions = mainRegional.filter(element => element.label.toLowerCase().indexOf(needle) > -1)
-                })
-            }" @update:model-value="async (value) => {
-                await getOptions(value)
-            }" />
+                                            regionalOptions = mainRegional.filter(element => element.label.toLowerCase().indexOf(needle) > -1)
+                                        })
+                                    }" @update:model-value="async (value) => {
+    await getOptions(value)
+}" />
                             </div>
 
                             <div class="col-10 q-mt-sm">
                                 <q-select filled stack-label
                                     :disable="place.length !== 0 ? true : false || loadingInstitute" v-model="institute"
-                                    :loading="loadingInstitute" :options="instituteOptions"
-                                    label="Dependencia / Centro" />
+                                    :loading="loadingInstitute" :options="instituteOptions" label="Dependencia / Centro" />
                             </div>
 
 
@@ -497,8 +503,7 @@
                                     <div class="col-12">
                                         <div class="row q-px-sm">
                                             <div class="col-auto" v-for="(element, index) in place">
-                                                <q-chip removable :label="element.data"
-                                                    @remove="place.splice(index, 1)" />
+                                                <q-chip removable :label="element.data" @remove="place.splice(index, 1)" />
                                             </div>
                                         </div>
                                     </div>
@@ -523,43 +528,42 @@
                                                         :options="placecountyOptions" label="Departamento"
                                                         @filter="function (val, update) { update(() => { placecountyOptions = mainplaceCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
                                                         @update:model-value="async (value) => {
-                if (value) {
-                    mainplaceCity = await getCity([value]); placecityOptions = await getCity([value]); placeCity = null; loadingCity = false
-                } else {
-                    placeCity = null
-                    mainplaceCity.splice(0)
-                    placecityOptions.splice(0)
-                }
-            }" />
+                                                            if (value) {
+                                                                mainplaceCity = await getCity([value]); placecityOptions = await getCity([value]); placeCity = null; loadingCity = false
+                                                            } else {
+                                                                placeCity = null
+                                                                mainplaceCity.splice(0)
+                                                                placecityOptions.splice(0)
+                                                            }
+                                                        }" />
                                                 </div>
                                                 <div class="col-12 q-pa-sm">
                                                     <q-select filled stack-label use-input
-                                                        :disable="otherPlace !== null || loadingCity"
-                                                        :loading="loadingCity" v-model="placeCity"
-                                                        :options="placecityOptions" label="Municipio"
+                                                        :disable="otherPlace !== null || loadingCity" :loading="loadingCity"
+                                                        v-model="placeCity" :options="placecityOptions" label="Municipio"
                                                         @filter="function (val, update) { update(() => { placecityOptions = mainplaceCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
                                                 </div>
                                             </div>
                                             <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
                                                 <q-btn @click="() => {
-                if (otherPlace !== null && otherPlace !== '') {
-                    place.splice(0)
-                    place.push({ data: otherPlace, id: null })
-                } else if (placeCity !== null) {
-                    place.splice(0)
-                    place.push({ data: placeCity.label, id: placeCity.data })
-                }
+                                                    if (otherPlace !== null && otherPlace !== '') {
+                                                        place.splice(0)
+                                                        place.push({ data: otherPlace, id: null })
+                                                    } else if (placeCity !== null) {
+                                                        place.splice(0)
+                                                        place.push({ data: placeCity.label, id: placeCity.data })
+                                                    }
 
-                otherPlace = null
+                                                    otherPlace = null
 
-                placeCounty = null
+                                                    placeCounty = null
 
-                mainplaceCity.splice(0)
-                placecityOptions.splice(0)
-                placeCity = null
+                                                    mainplaceCity.splice(0)
+                                                    placecityOptions.splice(0)
+                                                    placeCity = null
 
-                saveplaceOption = false
-            }" label="AGREGAR" class="bg-primary text-white" />
+                                                    saveplaceOption = false
+                                                }" label="AGREGAR" class="bg-primary text-white" />
                                             </div>
                                         </q-menu>
                                     </div>
@@ -595,7 +599,7 @@
                             </div>
 
                             <div class="col-12">
-                                <template v-for="(element, index) in duties" :key="index">
+                                <template v-for="(element, index) in duties">
                                     <div class="row">
                                         <div class="col-10 q-pa-sm">
                                             <q-input filled stack-label autogrow v-model="element.data"
@@ -623,7 +627,7 @@
                                 <p class="q-my-none text-primary" style="font-size: 18px;">Actividades</p>
                             </div>
                             <div class="col-12">
-                                <template v-for="(element, index) in getActivities" :key="index">
+                                <div v-for="(element, index) in getActivities" :key="element">
                                     <div class="row justify-center">
                                         <div class="col-12">
                                             <p v-text="`Fecha: ${element.date.slice(8)}/${element.date.slice(5, 7)}/${element.date.slice(0, 4)}`"
@@ -646,8 +650,7 @@
                                                                     @click="element.items.splice(itemIndex, 1)" dense
                                                                     label="Eliminar" class="bg-red text-white" />
                                                             </div>
-                                                            <div v-else-if="getActivities.length - 1 !== 0"
-                                                                class="col-12">
+                                                            <div v-else-if="getActivities.length - 1 !== 0" class="col-12">
                                                                 <q-btn
                                                                     v-if="index == 0 && itemIndex !== 0 || index == getActivities.length - 1 && itemIndex !== element.items.length - 1"
                                                                     @click="element.items.splice(itemIndex, 1)" dense
@@ -672,7 +675,7 @@
                                         </div>
                                     </div>
 
-                                </template>
+                                </div>
                             </div>
                         </div>
 
@@ -762,6 +765,20 @@ const scheduleStore = useScheduleStore()
 
 const userStore = useUserStore()
 
+let cargando = ref(false)
+
+
+function imprimirPagina() {
+
+    const printableContent = document.getElementById('descargar').innerHTML;
+    const originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = printableContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+    window.location.reload();
+}
+
 async function getCounty(query = {}) {
     const { data, status } = await scheduleStore.getCounty(query)
 
@@ -807,6 +824,8 @@ async function getSchedule(id, query = {}) {
 
 onBeforeMount(
     async () => {
+        cargando.value = true
+        
         gocountyOptions.value = await getCounty()
         returncountyOptions.value = await getCounty()
 
@@ -828,6 +847,7 @@ onBeforeMount(
 
         console.log(user)
 
+        cargando.value = true
         if (user.role.data == 'user') {
             currentUser.value = await getCurrentUser(user.id)
 
@@ -839,7 +859,7 @@ onBeforeMount(
 
             identification.value = currentUser.value.identification
 
-            identification.value.label = optionsIdentification.value[identification.value.index].label
+            //identification.value.label = optionsIdentification.value[identification.value.index].label
 
             contract.value = currentUser.value.contract
 
@@ -861,6 +881,8 @@ onBeforeMount(
 
             paymaster.value.position = currentUser.value.paymaster.position
         }
+        cargando.value = false
+
     })
 
 // table
@@ -891,7 +913,7 @@ const columns = ref([
     },
     {
         name: 'opciones',
-        label: 'Opciones',
+        label: 'Acciones',
         align: 'center'
     }
 ])
@@ -1213,7 +1235,7 @@ const getActivities = computed(() => {
             const dateDifference = date.getDateDiff(dateEnd, dateStart, unit)
 
 
-            console.log(dateDifference, activities.value.length)
+            //console.log(dateDifference, activities.value.length)
 
             // if(activities.value.length - 1 !== dateDifference)  {
             activities.value.splice(0)
@@ -1221,7 +1243,7 @@ const getActivities = computed(() => {
             for (let index = 0; index < dateDifference + 1; index++) {
                 const date = new Date(tripStart.value.slice(0, 4), parseInt(tripStart.value.slice(5, 7)) - 1, parseInt(tripStart.value.slice(8)) + index)
 
-                console.log(date.toISOString())
+                //console.log(date.toISOString())
 
                 if (index == 0) {
                     if (dateDifference == 0) {
@@ -1275,7 +1297,7 @@ async function getSign() {
 
             sign.value.contractor = url
 
-            showNotify('Agenda Contratista firmada', 'positive', '')
+            showNotify('Agenda Contratista firmada', 'positive', 'check')
         } else {
             showNotify('Error, Firma no encontrada', 'negative')
         }
@@ -1285,7 +1307,9 @@ async function getSign() {
 async function createSchedule() {
     await scheduleStore.postSchedule({
         contractor: currentUser.value._id,
+        userId: currentUser.value._id,
         contract: {
+            mail: currentUser.value.mail,
             number: contract.value.number,
             date: contract.value.date,
             contractorName: contractor.value,
@@ -1324,6 +1348,13 @@ async function createSchedule() {
         }
     })
 
+    $q.notify({
+        message: "Agenda Creada, pendiente por aprobación del supervisor",
+        color: "positive",
+        icon: 'check',
+        position: 'bottom',
+        timeout: 4500
+    })
     await cleanDialog()
 }
 

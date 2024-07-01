@@ -1,51 +1,228 @@
 import Schedule from '../models/schedule.js'
 
+import User from '../models/user.js'
+
 import cloudinary from 'cloudinary'
+
+import sendEmail from "../middlewares/sendEmail.js"
 
 import fs from 'fs'
 
 const httpSchedule = {
+    /* postSchedule: async (req, res) => {
+        const schedule = new Schedule(req.body)
+
+        await schedule.save()
+
+        return res.status(200).json({ msg: 'Agenda creada' })
+    }, */
+
+    postSchedule: async (req, res) => {
+
+        const schedule = new Schedule(req.body)
+
+        try {
+
+            const existingSchedule = await Schedule.findOne({
+                $or: [
+                    { tripStart: { $gte: req.body.tripStart, $lte: req.body.tripEnd }, tripEnd: { $gte: req.body.tripEnd, $lte: req.body.tripEnd } }
+                ],
+            })
+
+            if (existingSchedule) {
+                return res.status(400).json({ msg: 'Ya existe una agenda que con exactamente las mismas fechas' });
+            }
+
+            await schedule.save()
+
+            // Obtener el usuario que creó la agenda
+            const user = await User.findById(req.body.userId).populate('supervisor').populate('paymaster');
+
+            if (!user) {
+                return res.status(404).json({ msg: 'Usuario no encontrado' });
+            }
+
+            const link = 'https://vile-cat.onrender.com'
+
+            // CONTRATISTA CREA AGENDA
+            if (user.role.data === "user" && user.staffType.data === "contractor") {
+                // Obtener el correo del supervisor
+
+                const supervisorEmail = user.supervisor.mail;
+
+                let mailOptions = {
+                    from: '<vilecat270@gmail.com>',
+                    to: supervisorEmail,
+                    subject: 'Creación de agenda',
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">NUEVA AGENDA CREADA</p>
+                    <img src="cid:nuevo" alt="Nueva Agenda" style="display: block; margin: 0 auto; max-width: 20%; height: auto;">
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${user.supervisor.name},</p>
+                    <p style="font-size: 16px; color: #333;">El contratista <strong>${user.name}</strong> ha creado una nueva agenda. Por favor, revísela para aprobarla o rechazarla.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                    attachments: [
+                        {
+                            filename: 'nuevo.png',
+                            path: './images/nuevo.png',
+                            cid: 'nuevo'
+                        },
+                        {
+                            filename: 'logo-sena-blanco.png',
+                            path: './images/logo-sena-blanco.png',
+                            cid: 'logo_sena'
+                        }
+                    ]
+                }
+                sendEmail.sendMail(mailOptions, function (error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Correo enviado');
+                    }
+                });
+            } else if (user.role.data === "user" && user.staffType.data === "publicWorker") {
+                // FUNCIONARIO CREA AGENDA
+
+                // Obtener el correo del ordenador
+
+                const paymasterEmail = user.paymaster.mail;
+
+                let mailOptions = {
+                    from: '<vilecat270@gmail.com>',
+                    to: paymasterEmail,
+                    subject: 'Creación de agenda',
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">NUEVA AGENDA CREADA</p>
+                    <img src="cid:nuevo" alt="Nueva Agenda" style="display: block; margin: 0 auto; max-width: 20%; height: auto;">
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${user.paymaster.name},</p>
+                    <p style="font-size: 16px; color: #333;">El funcionario <strong>${user.name}</strong> ha creado una nueva agenda. Por favor, revísala para aprobarla o rechazarla.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                    attachments: [
+                        {
+                            filename: 'nuevo.png',
+                            path: './images/nuevo.png',
+                            cid: 'nuevo'
+                        },
+                        {
+                            filename: 'logo-sena-blanco.png',
+                            path: './images/logo-sena-blanco.png',
+                            cid: 'logo_sena'
+                        }
+                    ]
+
+                };
+                sendEmail.sendMail(mailOptions, function (error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Correo enviado');
+                    }
+                });
+            } else if (user.role.data = "supervisor") {
+                const paymasterEmail = user.paymaster.mail;
+
+                let mailOptions = {
+                    from: '<vilecat270@gmail.com>',
+                    to: paymasterEmail,
+                    subject: 'Creación de agenda',
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">NUEVA AGENDA CREADA</p>
+                    <img src="cid:nuevo" alt="Nueva Agenda" style="display: block; margin: 0 auto; max-width: 20%; height: auto;">
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${user.paymaster.name},</p>
+                    <p style="font-size: 16px; color: #333;">El supervisor de contrato <strong>${user.name}</strong> ha creado una nueva agenda. Por favor, revísala para aprobarla o rechazarla.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                    attachments: [
+                        {
+                            filename: 'nuevo.png',
+                            path: './images/nuevo.png',
+                            cid: 'nuevo'
+                        },
+                        {
+                            filename: 'logo-sena-blanco.png',
+                            path: './images/logo-sena-blanco.png',
+                            cid: 'logo_sena'
+                        }
+                    ]
+                };
+                sendEmail.sendMail(mailOptions, function (error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Correo enviado');
+                    }
+                });
+            }
+
+            return res.status(200).json({ msg: 'Agenda creada' })
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ msg: "Error al crear la agenda" });
+        }
+
+    },
+
     getSchedule: async (req, res) => {
         const schedule = await Schedule.find()
 
         const data = []
 
-        if(req.query.supervisor) {
+        if (req.query.supervisor) {
             const { supervisor } = req.query
 
-            for(let index = 0; index < schedule.length; index++) {
-                if(req.query.historical) {
-                    if(schedule[index].supervisor.id == supervisor && schedule[index].status.index !== 1 && schedule[index].status.index !== null) {
+            for (let index = 0; index < schedule.length; index++) {
+                if (req.query.historical) {
+                    if (schedule[index].supervisor.id == supervisor && schedule[index].status.index !== 1 && schedule[index].status.index !== null) {
                         data.push(schedule[index])
                     }
-                } else if(req.query.legalization) {
-                    if(schedule[index].supervisor.id = supervisor && schedule[index].status.index == 5) {
+                } else if (req.query.legalization) {
+                    if (schedule[index].supervisor.id = supervisor && schedule[index].status.index == 5) {
                         data.push(schedule[index])
                     }
                 } else {
-                    if(schedule[index].supervisor.id == supervisor && schedule[index].status.index == 1) {
+                    if (schedule[index].supervisor.id == supervisor && schedule[index].status.index == 1) {
                         data.push(schedule[index])
                     }
                 }
             }
-        } else if(req.query.paymaster) {
+        } else if (req.query.paymaster) {
             const { paymaster } = req.query
 
-            for(let index = 0; index < schedule.length; index++) {
-                if(schedule[index].paymaster.id == paymaster && schedule[index].status.index == 2) {
+            for (let index = 0; index < schedule.length; index++) {
+                if (schedule[index].paymaster.id == paymaster && schedule[index].status.index == 2) {
                     data.push(schedule[index])
                 }
             }
         } else {
-            if(req.query.legalization) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 6) {
+            if (req.query.legalization) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 6) {
                         data.push(schedule[index])
                     }
                 }
             } else {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 3) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 3) {
                         data.push(schedule[index])
                     }
                 }
@@ -56,77 +233,77 @@ const httpSchedule = {
     },
 
 
-    getScheduleParams: async(req, res) => {
+    getScheduleParams: async (req, res) => {
         const { id } = req.params
 
         const data = []
 
-        if(req.query.contractor) {
-            const schedule = await Schedule.find({contractor: id})
+        if (req.query.contractor) {
+            const schedule = await Schedule.find({ contractor: id })
 
             if (req.query.historical) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index !== null ) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index !== null) {
                         data.push(schedule[index])
                     }
                 }
             } else if (req.query.legalization) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 4) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 4) {
                         data.push(schedule[index])
                     }
                 }
             } else {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == null || schedule[index].status.index == 0) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == null || schedule[index].status.index == 0) {
                         data.push(schedule[index])
                     }
                 }
             }
         }
 
-        if(req.query.publicWorker) {
-            const schedule = await Schedule.find({publicWorker: id})
+        if (req.query.publicWorker) {
+            const schedule = await Schedule.find({ publicWorker: id })
 
-            if(req.query.legalization) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 4) {
+            if (req.query.legalization) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 4) {
                         data.push(schedule[index])
                     }
                 }
-            } else if(req.query.historical){
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status !== null) {
+            } else if (req.query.historical) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status !== null) {
                         data.push(schedule[index])
                     }
                 }
             } else {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == null || schedule[index].status.index == 0) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == null || schedule[index].status.index == 0) {
                         data.push(schedule[index])
                     }
                 }
             }
         }
 
-        if(req.query.supervisor) {
-            const schedule = await Schedule.find({supervisor_id: id})
+        if (req.query.supervisor) {
+            const schedule = await Schedule.find({ supervisor_id: id })
 
-            if(req.query.legalization) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 4) {
+            if (req.query.legalization) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 4) {
                         data.push(schedule[index])
                     }
                 }
-            } else if(req.query.historical) {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index !== null) {
+            } else if (req.query.historical) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index !== null) {
                         data.push(schedule[index])
                     }
                 }
             } else {
-                for(let index = 0; index < schedule.length; index++) {
-                    if(schedule[index].status.index == 0 || schedule[index].status.index == null) {
+                for (let index = 0; index < schedule.length; index++) {
+                    if (schedule[index].status.index == 0 || schedule[index].status.index == null) {
                         data.push(schedule[index])
                     }
                 }
@@ -135,35 +312,296 @@ const httpSchedule = {
         }
 
         return res.status(200).json(data)
-    },
-
-    postSchedule: async (req, res) => {
-        const schedule = new Schedule(req.body)
-
-        await schedule.save()
-
-        return res.status(200).json({msg: 'Agenda creada'})
     },
 
     putSchedule: async (req, res) => {
         const { id } = req.params
 
-        await Schedule.findByIdAndUpdate(id, req.body)
+        // Aquí asumo que estás enviando el nuevo estado de la agenda en req.body.status
+        const schedule = await Schedule.findByIdAndUpdate(id, req.body, { new: true });
 
-        return res.status(200).json({msg: 'Agenda modificada'})
+        // Obtener el usuario que creó la agenda
+        const creator = await User.findOne({ mail: schedule.contract.mail }).populate('paymaster');
+
+        /* if (!creator || !paymaster) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        } */
+
+        const link = 'https://vile-cat.onrender.com'
+
+        if (req.body.status.data === "Agenda rechazada") {
+            // Obtener el usuario que modificó la agenda
+            const modUser = await User.findById(req.body.userId)
+
+            if (modUser.role.data === "supervisor") {
+                // SUPERVISOR RECHAZA AGENDA
+
+                let SupervisorMailOptions = {
+                    from: '<vilecat270@gmail.com>',
+                    to: creator.mail,
+                    subject: 'Agenda Rechazada',
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                         <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                         <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                         <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                         </div><br />
+                         <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA RECHAZADA</p>
+                         <img src="cid:rechazar" alt="Rechazar" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                         <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
+                         <p style="font-size: 16px; color: #333;">Su supervisor de contrato <strong>${modUser.name}</strong> ha rechazado su agenda con la siguiente justificacion: <strong>${schedule.status.justification}</strong></p>
+                         <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                         <span>*Este correo es generado automáticamente, por favor no responder</span>
+                     </div>
+                     `,
+                    attachments: [{
+                        filename: 'logo-sena-blanco.png',
+                        path: './images/logo-sena-blanco.png',
+                        cid: 'logo_sena'
+                    },
+                    {
+                        filename: 'rechazar.png',
+                        path: './images/rechazar.png',
+                        cid: 'rechazar'
+                    }]
+                }
+                sendEmail.sendMail(SupervisorMailOptions, function (error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Correo enviado a contratista');
+                    }
+                });
+
+            } else if (modUser.role.data === "paymaster") {
+                // ORDENADOR RECHAZA AGENDA
+                let paymasterMailOptions = {
+                    from: '<vilecat270@gmail.com>',
+                    to: creator.mail,
+                    subject: 'Agenda Rechazada',
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                        <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                        <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                        <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                        </div><br />
+                        <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA RECHAZADA</p>
+                        <img src="cid:rechazar" alt="Rechazar" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                        <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
+                        <p style="font-size: 16px; color: #333;">El ordenador del gasto <strong>${modUser.name}</strong> ha rechazado su agenda creada con la siguiente justificacion: <strong>${schedule.status.justification}</strong></p>
+                        <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                        <span>*Este correo es generado automáticamente, por favor no responder</span>
+                    </div>
+                    `,
+                    attachments: [{
+                        filename: 'logo-sena-blanco.png',
+                        path: './images/logo-sena-blanco.png',
+                        cid: 'logo_sena'
+                    },
+                    {
+                        filename: 'rechazar.png',
+                        path: './images/rechazar.png',
+                        cid: 'rechazar'
+                    }]
+                }
+                sendEmail.sendMail(paymasterMailOptions, function (error) {
+                    if (error) {
+                        console.log(error);
+                    } else {
+                        console.log('Correo enviado');
+                    }
+                });
+            }
+
+        } else if (req.body.status.data === "Agenda firmada por Supervisor") {
+
+            // CUANDO EL SUPERVISOR FIRMA AGENDA, NOTIFICAR AL CONTRATISTA Y ORDENADOR
+
+            // Obtener el supervisor que modificó la agenda
+            const supervisor = await User.findById(req.body.userId)
+
+            // NOTIFICAR AL CONTRATISTA
+            let creatorMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.mail,
+                subject: 'Agenda Aprobada y Firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
+                    <p style="font-size: 16px; color: #333;">Su supervisor de contrato <strong>${supervisor.name}</strong> ha aprobado su agenda creada. Queda pendiente por aprobación del
+                    ordenador del gasto</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+            };
+
+            // NOTIFICAR AL ORDENADOR
+            let paymasterMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.paymaster.mail,
+                subject: 'Agenda Aprobada y Firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900;display:flex;align-items:center;padding:10px;justify-content:center">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="width: 50px; height: 50px;">
+                    <h2 style="color:white;margin-left:10px">VILE</h2>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.paymaster.name},</p>
+                    <p style="font-size: 16px; color: #333;">El supervisor de contrato <strong>${supervisor.name}</strong> del contratista <strong>${creator.name}</strong> ha aprobado la agenda creada. Queda pendiente por su
+                    aprobación o rechazo</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+            }
+
+            // Envío de correos
+            sendEmail.sendMail(creatorMailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo al creador:', error);
+                } else {
+                    console.log('Correo al creador enviado correctamente');
+                }
+            });
+
+            sendEmail.sendMail(paymasterMailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo al ordenador:', error);
+                } else {
+                    console.log('Correo al ordenador enviado correctamente');
+                }
+            });
+        } else if (req.body.status.data === "Agenda firmada por Ordenador") {
+
+            // Obtener el paymaster que modificó la agenda
+            const paymaster = await User.findById(req.body.userId)
+
+            // NOTIFICAR AL CREADOR
+            let mailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.mail,
+                subject: 'Agenda Aprobada y Firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
+                    <p style="font-size: 16px; color: #333;">El ordenador del gasto <strong>${paymaster.name}</strong> ha aprobado su agenda creada. Queda pendiente por 
+                    la creación de legalización por parte del Administrador</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+
+            };
+
+            // NOTIFICA AL ADMIN
+
+            // obtener el admin
+            const adminUser = await User.findOne({ 'role.data': 'administrator' });
+
+            let adminMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: adminUser.mail,
+                subject: 'Agenda Aprobada y Firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola administrador ${adminUser.name},</p>
+                    <p style="font-size: 16px; color: #333;">El ordenador del gasto <strong>${paymaster.name}</strong> ha firmado la agenda de <strong>${creator.name}</strong>. Queda pendiente por 
+                    la creación de la legalización</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+
+            };
+
+            sendEmail.sendMail(mailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo del ordenador aprobado...', error);
+                } else {
+                    console.log('Correo del ordenador enviado correctamente');
+                }
+            });
+
+            sendEmail.sendMail(adminMailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo al admin...', error);
+                } else {
+                    console.log('Correo del ordenador al admin enviado correctamente');
+                }
+            });
+
+        }
+
+        return res.status(200).json({ msg: 'Agenda modificada' })
     },
+
 
     postLegalizacion: async (req, res) => {
         const { id } = req.params
 
         console.log(req.files)
 
-        const schedule = await Schedule.findOne({_id: id})
+        const schedule = await Schedule.findOne({ _id: id })
 
-        if(schedule.collections && schedule.collections.length !== 0) {
-            for(let index = 0; index < schedule.collections.length; index++) {
-                for(let mainIndex = 0; mainIndex < schedule.collections[index].items.length; mainIndex++) {
-                    if(schedule.collections[index].items[mainIndex].public_id) {
+        if (schedule.collections && schedule.collections.length !== 0) {
+            for (let index = 0; index < schedule.collections.length; index++) {
+                for (let mainIndex = 0; mainIndex < schedule.collections[index].items.length; mainIndex++) {
+                    if (schedule.collections[index].items[mainIndex].public_id) {
                         try {
                             await cloudinary.v2.uploader.destroy(
                                 schedule.collections[index].items[mainIndex].public_id,
@@ -178,10 +616,10 @@ const httpSchedule = {
                             //         console.log(err)
                             //     }
 
-                                // console.log(`${index}${mainIndex}`)
+                            // console.log(`${index}${mainIndex}`)
 
                             // })
-                        } catch(error) {
+                        } catch (error) {
                             console.log(error)
                         }
                     }
@@ -191,14 +629,14 @@ const httpSchedule = {
 
         const data = []
 
-        if(!req.files || Object.keys(req.files).length == 0) {
-            return res.status(400).json({msg: 'Error, Archivos no encontrados'})
+        if (!req.files || Object.keys(req.files).length == 0) {
+            return res.status(400).json({ msg: 'Error, Archivos no encontrados' })
         }
 
-        fs.exists('uploads', function(exists) {
-            if(!exists) {
-                fs.mkdir('uploads', function(error) {
-                    if(error) {
+        fs.exists('uploads', function (exists) {
+            if (!exists) {
+                fs.mkdir('uploads', function (error) {
+                    if (error) {
                         console.log(error)
                     }
                 })
@@ -207,21 +645,21 @@ const httpSchedule = {
 
         const keys = Object.keys(req.files)
 
-        for(let index = 0; index < keys.length; index++) {
+        for (let index = 0; index < keys.length; index++) {
             // console.log(req.files[keys[index]])
 
-            fs.exists(`uploads/${keys[index]}`, function(exists) {
-                if(!exists) {
-                    fs.mkdir(`uploads/${keys[index]}`, function(error) {
-                        if(error) {
+            fs.exists(`uploads/${keys[index]}`, function (exists) {
+                if (!exists) {
+                    fs.mkdir(`uploads/${keys[index]}`, function (error) {
+                        if (error) {
                             console.log(error)
                         }
                     })
                 }
 
-                
-                req.files[keys[index]].mv(`uploads/${keys[index]}/${req.files[keys[index]].name}`, async function(err) {
-                    if(err) {
+
+                req.files[keys[index]].mv(`uploads/${keys[index]}/${req.files[keys[index]].name}`, async function (err) {
+                    if (err) {
                         console.log(err)
                     }
 
@@ -232,7 +670,7 @@ const httpSchedule = {
                                 public_id: 'file',
                                 folder: `/test/img/${id}/${keys[index]}`,
                                 // transformation: [
-                                    // { width: 800, crop: 'limit'}
+                                // { width: 800, crop: 'limit'}
                                 // ]
                             }
                         )
@@ -241,25 +679,25 @@ const httpSchedule = {
 
                         data.push({ url: result.secure_url, folder: keys[index], public_id: result.public_id })
 
-                        fs.unlink(`uploads/${keys[index]}/${req.files[keys[index]].name}`, function(err) {
-                            if(err) {
+                        fs.unlink(`uploads/${keys[index]}/${req.files[keys[index]].name}`, function (err) {
+                            if (err) {
                                 console.log(err)
                             }
 
-                            fs.rmdir(`uploads/${keys[index]}`, function(err) {
-                                if(err) {
+                            fs.rmdir(`uploads/${keys[index]}`, function (err) {
+                                if (err) {
                                     console.log(err)
                                 }
                             })
                         })
 
-                        if(data.length == keys.length) {
+                        if (data.length == keys.length) {
                             await Schedule.findByIdAndUpdate(id, { tempUrl: data })
 
-                            return res.status(200).json({msg: 'Archivos almacenados en la nube'})
+                            return res.status(200).json({ msg: 'Archivos almacenados en la nube' })
                         }
 
-                    } catch(error) {
+                    } catch (error) {
                         console.log(error)
                     }
                 })
@@ -268,16 +706,16 @@ const httpSchedule = {
 
     },
 
-    putLegalization: async(req, res) => {
+    putLegalization: async (req, res) => {
         const { id } = req.params
 
         const { collections, status, legalization } = req.body
 
         const data = { results: req.body.results, conclusions: req.body.conclusions, legalization: { signature: {} } }
 
-        const schedule = await Schedule.findOne({_id: id})
+        const schedule = await Schedule.findOne({ _id: id })
 
-        if(schedule.legalization) {
+        if (schedule.legalization) {
             data.legalization = schedule.legalization
         }
 
@@ -292,32 +730,32 @@ const httpSchedule = {
 
         console.log(legalization)
 
-        if(legalization.signature.supervisor) {
+        if (legalization.signature.supervisor) {
             data.legalization.signature.supervisor = legalization.signature.supervisor
         }
 
-        if(legalization.signature.contractor) {
+        if (legalization.signature.contractor) {
             data.legalization.signature.contractor = legalization.signature.contractor
         }
 
-        if(legalization.signature.publicWorker) {
+        if (legalization.signature.publicWorker) {
             data.legalization.signature.publicWorker = legalization.signature.publicWorker
         }
 
-        if(legalization.createdAt) {
+        if (legalization.createdAt) {
             data.legalization.createdAt = legalization.createdAt
         }
 
-        if(status.index == 4) {
+        if (status.index == 4) {
             data.legalization = legalization
         }
 
         console.log(data)
 
-        if(schedule.tempUrl.length !== 0) {
-            for(let index = 0; index < schedule.tempUrl.length; index++) {
-                for(let mainIndex = 0; mainIndex < collections.length; mainIndex++) {
-                    if(collections[mainIndex].keys.includes(schedule.tempUrl[index].folder)) {
+        if (schedule.tempUrl.length !== 0) {
+            for (let index = 0; index < schedule.tempUrl.length; index++) {
+                for (let mainIndex = 0; mainIndex < collections.length; mainIndex++) {
+                    if (collections[mainIndex].keys.includes(schedule.tempUrl[index].folder)) {
                         collections[mainIndex].items.push({ url: schedule.tempUrl[index].url, public_id: schedule.tempUrl[index].public_id })
                     }
                 }
@@ -330,7 +768,7 @@ const httpSchedule = {
 
         await Schedule.findByIdAndUpdate(id, data)
 
-        return res.status(200).json({msg: 'Agenda prueba'})
+        return res.status(200).json({ msg: 'Agenda prueba' })
     }
 }
 

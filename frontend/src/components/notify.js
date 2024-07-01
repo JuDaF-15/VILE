@@ -5,7 +5,7 @@ function showNotify(message, type, icon = 'warning') {
         message: message,
         type: type,
         icon: icon,
-        position: 'top'
+        position: 'bottom'
     })
 }
 

@@ -5,18 +5,17 @@ const sendEmail = nodemailer.createTransport({
     port: 465,
     secure: true,
     ignoreTLS: true,
-    auth:{
-        user:'repositoriosena123@gmail.com',
-        pass: 'uidp tzee kkvd rddq',
+    auth: {
+        user: 'vilecat270@gmail.com',
+        pass: 'hnwc vnqe lzwf rlyz'
     },
-    tls:{
-rejectUnauthorized: false,
+    tls: {
+        rejectUnauthorized: false,
     }
 })
 
-sendEmail.verify().then(()=>{
+sendEmail.verify().then(() => {
     console.log('Envio de email listo');
-    
 });
 
 export default sendEmail

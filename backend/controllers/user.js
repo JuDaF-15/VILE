@@ -13,7 +13,7 @@ console.log(XLSX)
 
 XLSX.set_fs(fs)
 
-function generateInfoOfExcel(file, req) {
+/* function generateInfoOfExcel(file, req) {
     console.log(file)
 
     const excelFile = XLSX.readFile(file.tempFilePath);
@@ -35,13 +35,15 @@ function generateInfoOfExcel(file, req) {
     console.log(data)
 
 
-};
+}; */
 
 const httpUser = {
     getUser: async (req, res) => {
         let data = []
 
-        const user = await User.find()
+        const user = await User.find().populate("paymaster").populate("supervisor").populate("regional").populate("institute")
+
+        //const user = await User.find()
 
         for (let index = 0; index < user.length; index++) {
             if (req.query.user) {
@@ -90,7 +92,7 @@ const httpUser = {
             data.institute = req.body.institute
 
             try {
-                data.password = await bcrypt.hash(req.body.identification.number, saltRounds)
+                data.password = await bcrypt.hash(req.body.password, saltRounds)
             } catch (error) {
                 console.log(error)
                 return res.status(400).json({ msg: 'Error, Usuario no creado' })
@@ -105,63 +107,192 @@ const httpUser = {
         }
         const user = new User(data)
 
-        await user.save()
+        const buscarCedula = await User.findOne({ identification: req.body.identification });
+        const buscarCorreo = await User.findOne({ mail: req.body.mail });
+        /* const buscarNumContrato = await User.findOne({ 
+            'staffType.data': 'contractor',
+            'contract.number': req.body.contract.number  // Aquí especificas la condición adicional para el rol
+        }); */
+        
+        if (buscarCorreo) {
+            return res
+                .status(400)
+                .json({ msg: "Ya existe un usuario con ese correo", buscarCorreo });
+        } else if (buscarCedula) {
+            return res
+                .status(400)
+                .json({ msg: "Ya existe un usuario con esa cedula", buscarCedula });
+        } /* else if (buscarNumContrato) {
+            return res
+                .status(400)
+                .json({ msg: "Ya existe un contratista con ese número de contrato", buscarNumContrato });
+        } */ else {
 
-        let mailOptions = {
-            from: 'repositoriosena123@gmail.com',
-            to: user.mail,
-            subject: 'Bienvenido a VILE',
-            text: `Hola ${user.name},\n\nHas sido registrado en nuestra plataforma. Aquí están tus credenciales:\n\nNo. de Identificación: ${user.identification}\nContraseña: ${req.body.password}\n\nPor favor, no compartas esta información con nadie.\n\nSaludos,\nEl equipo de Nuestra Plataforma`
-        };
+            await user.save()
 
-        sendEmail.sendMail(mailOptions, function (error) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log('Correo enviado');
-            }
-        });
+            const link = 'https://vile-cat.onrender.com'
 
-        return res.status(200).json({ msg: 'Usuario creado' })
+            let mailOptions = {
+                from: 'vilecat270@gmail.com',
+                to: user.mail,
+                subject: 'Bienvenido a VILE',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; font-weight:bold;color: #333">BIENVENIDO(A) A VILE</p>
+                    <img src="cid:bienvenida" alt="Bienvenida" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; font-weight:bold;color: #333">Hola ${user.name},</p>
+                    <p style="font-size: 16px; color: #333;">Ha sido registrado(a) en la plataforma VILE (Viajes y Legalizaciones) del Centro Agroturístico. Estas son sus
+                    credenciales de acceso:</p>
+                    <p style="font-size:16px;color: #333;"><strong>No. de documento: </strong>${user.identification}</p>
+                    <p style="font-size:16px;color: #333;"><strong>Contraseña: </strong>${req.body.password}</strong></p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a>
+                    <p style="font-size: 16px; color: #333; font-weight:bold">POR SU SEGURIDAD, NO COMPARTA ESTA INFORMACIÓN CON NADIE</p>
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'bienvenido.png',
+                    path: './images/bienvenido.png',
+                    cid: 'bienvenida'
+                },
+                {
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                }],
+            };
+
+            sendEmail.sendMail(mailOptions, function (error) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Correo enviado a usuario creado');
+                }
+            });
+
+            return res.status(200).json({ msg: 'Usuario creado' })
+        }
     },
 
-    putUser: async (req, res) => {
-        const userId = req.params.id
-        const data = {
-            name: req.body.name,
-            mail: req.body.mail,
-            identification: req.body.identification,
-            role: req.body.role,
-            position: req.body.position,
-            branch: req.body.branch,
-            paymaster: req.body.paymaster,
-            staffType: req.body.staffType
+    /*  putUser: async (req, res) => {
+         const userId = req.params.id
+         const data = {
+             name: req.body.name,
+             mail: req.body.mail,
+             identification: req.body.identification,
+             role: req.body.role,
+             position: req.body.position,
+             branch: req.body.branch,
+             paymaster: req.body.paymaster,
+             staffType: req.body.staffType
+         }
+ 
+         const buscar = await User.findById(userId)
+         if (buscar.role.data == 'user' && buscar.staffType.index == 0) {
+             data.contract = req.body.contract
+             data.object = req.body.object
+             data.supervisor = req.body.supervisor
+             data.regional = req.body.regional
+             data.institute = req.body.institute
+         }
+ 
+         try {
+             const updatedUser = await User.findOneAndUpdate(
+                 { _id: userId },
+                 {
+                     $set: data
+                 },
+                 { new: true }
+             );
+ 
+             res.status(200).json({ msg: 'Usuario actualizado exitosamente', user: updatedUser });
+ 
+         } catch (error) {
+             console.log(error);
+             res.status(502).json({ msg: 'ha ocurrido un error al momento de hacer el cambio' });
+             return error
+         }
+ 
+     }, */
+
+    /* putUser: async (req, res) => {
+        const { id } = req.params
+
+        try {
+            const buscarCedula = await User.findOne({ identification: req.body.identification });
+            const buscarCorreo = await User.findOne({ mail: req.body.identification });
+            if (buscarCedula) {
+                return res
+                    .status(400)
+                    .json({ msg: "Ya existe un usuario con ese número de cédula", buscarCedula });
+            } else if (buscarCorreo) {
+                return res
+                    .status(400)
+                    .json({ msg: "Ya existe un usuario con ese correo", buscarCorreo });
+            } else {
+                await User.findByIdAndUpdate(id, req.body)
+
+                return res.status(200).json({ msg: 'Usuario modificado' })
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ msg: "Error al editar usuario" });
         }
 
-        /* if (data.role.data == 'user' && data.staffType.index == 0) {
-            data.contract = req.body.contract
-            data.object = req.body.object
-            data.supervisor = req.body.supervisor
-            data.regional = req.body.regional
-            data.institute = req.body.institute
-        } */
+    },
+ */
+    putUser: async (req, res) => {
+        const userId = req.params.id;
 
-        // Encuentra el usuario por ID y actualiza los datos, excluyendo la contraseña
         try {
-            const updatedUser = await User.findOneAndUpdate(
-                { _id: userId },
-                {
-                    $set: data
-                },
-                { new: true }
-            );
+            const buscarCedula = await User.findOne({ identification: req.body.identification });
+            const buscarCorreo = await User.findOne({ mail: req.body.mail });
+            /* const buscarNumContrato = await User.findOne({
+                $and: [
+                    { 'staffType.data': 'contractor' },
+                    { 'contract.number': req.body.contract.number },
+                ]
+            }); */
 
-            res.status(200).json({ msg: 'Usuario actualizada exitosamente', user: updatedUser });
+            if (buscarCorreo && buscarCorreo._id.toString() !== userId) {
+                return res
+                    .status(400)
+                    .json({ msg: "Ya existe un usuario con ese correo", buscarCorreo });
+            } else if (buscarCedula && buscarCedula._id.toString() !== userId) {
+                return res
+                    .status(400)
+                    .json({ msg: "Ya existe un usuario con ese número de cédula", buscarCedula });
+            } /* else if (buscarNumContrato && buscarNumContrato._id.toString() !== userId) {
+                return res
+                    .status(400)
+                    .json({ msg: "Ya existe un contratista con ese número de contrato", buscarNumContrato });
+            } */ else {
 
+                Object.keys(req.body).forEach(key => {
+                    if (typeof req.body[key] === 'string') {
+                        req.body[key] = req.body[key].trim();
+                    }
+                });
+
+                const updatedUser = await User.findOneAndUpdate(
+                    { _id: userId },
+                    {
+                        $set: req.body,
+                    },
+                    { new: true }
+                );
+
+                res.status(200).json({
+                    msg: "Usuario modificado exitosamente",
+                    user: updatedUser,
+                });
+            }
         } catch (error) {
             console.log(error);
-            res.status(502).json({ msg: 'ha ocurrido un error al momento de hacer el cambio' });
-            return error
+            res.status(500).json({ msg: "Error al editar usuario" });
         }
 
     },
@@ -287,6 +418,8 @@ const httpUser = {
 
         if (!user) {
             return res.status(404).json({ msg: 'Credenciales inválidas' })
+        } else if (user.status === 0) {
+            return res.status(404).json({ msg: 'Usuario inactivo' })
         } else {
             await bcrypt.compare(password, user.password, async function (err, result) {
                 if (result == true) {
@@ -330,7 +463,7 @@ const httpUser = {
                 return res.status(404).json(`El correo proporcionado no se encuentra registrado`);
             }
 
-            let msg = "Por favor consulte su correo electrónico (incluida su bandeja de spam)";
+            let msg = "Por favor consulte su correo electrónico (incluida su bandeja de spam / correo no deseado)";
             let link;
             const token = jwt.sign({ id: usuario.id },
                 process.env.PRIVATE_KEY_MAIL,
@@ -341,19 +474,38 @@ const httpUser = {
             await usuario.save();
             try {
                 await sendEmail.sendMail({
-                    from: `<repositoriosena123@gmail.com>`,
+                    from: `<vilecat270@gmail.com>`,
                     to: usuario.mail,
-                    subject: "Recuperación de contraseña",
-                    html: `<div>
-  <b>Estimado usuario, haga click en el siguente enlace para comenzar la recuperación de su contraseña:</b><br>
-  <a href="${link}">${link}</a>
-  <h3>SI NO SOLICITÓ ESTE SERVICIO, POR FAVOR HACER CASO OMISO A ESTE CORREO</h>
-
-  </div>`
+                    subject: "Restablecimiento de contraseña",
+                    html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; font-weight:bold;color: #333">RECUPERACION DE CONTRASEÑA</p>
+                    <img src="cid:restablecer" alt="Restablecer contraseña" style="display: block; margin: 0 auto; max-width: 20%; height: auto;">
+                    <p style="font-size: 16px; font-weight:bold; color:#333">Hola ${usuario.name},</p>
+                    <p style="font-size: 16px; color: #333;">Se ha recibido una solicitud para restablecer su contraseña. Por favor, haga clic en el botón para comenzar:</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">RESTABLECER CONTRASEÑA</a>
+                    <p style="font-size: 16px; color: #333; font-weight:bold">SI NO SOLICITÓ ESTE SERVICIO, PUEDE IGNORAR ESTE CORREO.</p>
+                    <span>*Tiene 15 minutos para restablecer la contraseña, pasado este tiempo deberá generar un nuevo enlace</span><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                    attachments: [{
+                        filename: 'restablecer-la-contrasena.png',
+                        path: './images/restablecer-la-contrasena.png',
+                        cid: 'restablecer'
+                    },
+                    {
+                        filename: 'logo-sena-blanco.png',
+                        path: './images/logo-sena-blanco.png',
+                        cid: 'logo_sena'
+                    }]
                 })
                 console.log(link);
             } catch (error) {
-                console.log('error', error);
+                console.log('error al enviar correo de restablecimiento', error);
                 return res.status(400).json({ msg: 'Ha ocurrido un error' })
             }
             return res.status(202).json({ msg, link })

@@ -11,7 +11,7 @@ import NewPublic from '../pages/schedules/public/New.vue'
 
 
 import NewContractor from '../pages/schedules/contractor/New.vue'
-// import Preview from '../pages/schedules/contractor/Preview.vue'
+import Preview from '../pages/schedules/public/Preview.vue'
 
 // import PreviewLegalization from '../pages/schedules/administrator/Preview.vue'
 import Legalization from '../pages/schedules/administrator/Legalization.vue'
@@ -44,6 +44,7 @@ const routes = [
         redirect: '/layout/home',
         children: [
             { path: 'perfil', component: Profile },
+            //{ path: 'preview', component: Preview },
             { path: 'home', component: Home },
             {
                 path: 'agenda',

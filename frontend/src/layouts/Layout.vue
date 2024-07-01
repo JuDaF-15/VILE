@@ -21,7 +21,7 @@
 
                 <b style="text-transform: uppercase;font-size: larger; margin-top: 15px;"
                     v-text="user ? user.role.label : null" class="q-my-none" />
-
+                    
                 <p v-text="user ? user.mail : null" class="q-my-none" style="margin-top: 10px;" />
             </div><br>
 
@@ -38,7 +38,7 @@
 
             <q-separator />
             <q-list v-for="(item, index) in items">
-                <q-item style="padding: 5px;" v-ripple >
+                <q-item style="padding: 5px;" v-ripple>
 
                     <q-btn no-caps flat @click="goRoute(item); showDrawer = !showDrawer" class="full-width btn-menu">
                         <q-icon :name="item.icon" />
@@ -177,6 +177,4 @@ function goLogin() {
 .btn-menu:hover {
     background-color: #39a900;
 }
-
-
 </style>

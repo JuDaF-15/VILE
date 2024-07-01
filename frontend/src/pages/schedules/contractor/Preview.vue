@@ -1,5 +1,5 @@
 <template>
-    <div class="col-sm-8 col-lg-6" style="border: 2px solid black;">
+    <div class="col-sm-8 col-lg-6" style="border: 2px solid black;" id="element">
         <div class="row border-bottom">
             <!-- imagen -->
             <div class="col-10 items-center justify-center flex q-pa-sm border-right">
@@ -42,7 +42,8 @@
                     </div>
 
                     <div class="col-5 justify-center flex">
-                        <p v-text="createdAt && currentUser.role.data !== 'user' ? date.formatDate(createdAt, 'DD/MM/YYYY') : date.formatDate(Date.now(), 'DD/MM/YYYY')" class="q-my-sm" />
+                        <p v-text="createdAt && currentUser.role.data !== 'user' ? date.formatDate(createdAt, 'DD/MM/YYYY') : date.formatDate(Date.now(), 'DD/MM/YYYY')"
+                            class="q-my-sm" />
                     </div>
                 </div>
 
@@ -205,7 +206,8 @@
 
                 <div class="row border-bottom">
                     <div class="col-3 items-center flex border-right">
-                        <p class="q-my-none q-pl-sm" style="font-size: 10px;">CIUDAD/DEPARTAMENTO O MUNICIPIO/DEPARTAMENTO O CIUDAD/PAÍS</p>
+                        <p class="q-my-none q-pl-sm" style="font-size: 10px;">CIUDAD/DEPARTAMENTO O MUNICIPIO/DEPARTAMENTO O
+                            CIUDAD/PAÍS</p>
                     </div>
                     <div class="col-2 justify-center items-center flex border-right">
                         <p v-text="place ? place[0].data : '-'" class="q-my-none" />
@@ -293,20 +295,27 @@
                 <template v-for="(element, index) in activities">
                     <div class="row">
                         <div class="col-12 q-mt-sm q-ml-sm">
-                            <p class="q-my-none"><strong v-text="`Día ${index + 1}: ${element.date.slice(8)}/${element.date.slice(5, 7)}/${element.date.slice(2, 4)}`" /></p>
+                            <p class="q-my-none"><strong
+                                    v-text="`Día ${index + 1}: ${element.date.slice(8)}/${element.date.slice(5, 7)}/${element.date.slice(2, 4)}`" />
+                            </p>
 
                             <template v-for="(item, itemIndex) in element.items">
                                 <div v-if="index == 0">
                                     <div v-if="itemIndex == 0">
                                         <p v-text="item.data" class="q-my-none" />
-                                        <p class="q-my-none">Medios de Transporte: <span v-for="(gomeantransport, gomeanIndex) in goMeanstransport" v-text="gomeanIndex !== goMeanstransport.length - 1 ? gomeantransport.label + ', ' : gomeantransport.label" /></p>
-                                        <p v-if="element.items.length > 2 || activities.length > 1 && element.items.length > 1" class="q-my-none q-mt-sm">Actividades a Ejecutar:</p>
+                                        <p class="q-my-none">Medios de Transporte: <span
+                                                v-for="(gomeantransport, gomeanIndex) in goMeanstransport"
+                                                v-text="gomeanIndex !== goMeanstransport.length - 1 ? gomeantransport.label + ', ' : gomeantransport.label" />
+                                        </p>
+                                        <p v-if="element.items.length > 2 || activities.length > 1 && element.items.length > 1"
+                                            class="q-my-none q-mt-sm">Actividades a Ejecutar:</p>
                                     </div>
                                     <div v-else-if="activities.length == 1 && itemIndex == element.items.length - 1">
                                         <p v-text="item.data" class="q-my-none q-mt-sm" />
                                     </div>
                                     <div v-else>
-                                        <p v-text="item.data || 'Actividad'" :class="`q-my-none q-ml-sm ${itemIndex == element.items.length - 1 && activities.length == 1 ? 'q-mb-sm' : ''}`" />
+                                        <p v-text="item.data || 'Actividad'"
+                                            :class="`q-my-none q-ml-sm ${itemIndex == element.items.length - 1 && activities.length == 1 ? 'q-mb-sm' : ''}`" />
                                     </div>
                                 </div>
 
@@ -326,7 +335,10 @@
                                 </div>
                             </template>
 
-                            <p v-if="index == activities.length - 1" class="q-my-none">Medios de Transporte: <span v-for="(returnmeantransport, returnmeanIndex) in returnMeanstransport" v-text="returnmeanIndex !== returnMeanstransport.length - 1 ? returnmeantransport.label + ', ' : returnmeantransport.label" /></p>
+                            <p v-if="index == activities.length - 1" class="q-my-none">Medios de Transporte: <span
+                                    v-for="(returnmeantransport, returnmeanIndex) in returnMeanstransport"
+                                    v-text="returnmeanIndex !== returnMeanstransport.length - 1 ? returnmeantransport.label + ', ' : returnmeantransport.label" />
+                            </p>
                         </div>
                     </div>
                 </template>
@@ -353,20 +365,23 @@
                             <div class="col-4 border-right border-bottom">
                                 <p class="q-my-none q-pl-sm">FIRMA ORDENADOR DE GASTO:</p>
 
-                                <q-img v-if="sign.paymaster" fit="contain" :src="sign.paymaster" style="width: 140px; height: 80px;" />
+                                <q-img v-if="sign.paymaster" fit="contain" :src="sign.paymaster"
+                                    style="width: 140px; height: 80px;" />
                             </div>
 
                             <div class="col-4 border-right border-bottom">
                                 <p class="q-my-none q-pl-sm">FIRMA SUPERVISOR DEL CONTRATO:</p>
 
-                                <q-img v-if="sign.supervisor" fit="contain" :src="sign.supervisor" style="width: 140px; height: 80px;" />
+                                <q-img v-if="sign.supervisor" fit="contain" :src="sign.supervisor"
+                                    style="width: 140px; height: 80px;" />
 
                             </div>
 
                             <div class="col-4">
                                 <p class="q-my-none q-pl-sm">FIRMA DEL CONTRATISTA:</p>
 
-                                <q-img v-if="sign.contractor" fit="contain" :src="sign.contractor" style="width: 140px; height: 80px;" />
+                                <q-img v-if="sign.contractor" fit="contain" :src="sign.contractor"
+                                    style="width: 140px; height: 80px;" />
                             </div>
                         </div>
                     </div>
@@ -406,178 +421,195 @@
 </template>
 
 <script setup>
-    import { ref, onBeforeMount } from 'vue'
-    import { date, useQuasar } from 'quasar'
+import { ref, onBeforeMount } from 'vue'
+import { date, useQuasar } from 'quasar'
+import { useUserStore } from '../../../stores/user.js'
 
-    import { useUserStore } from '../../../stores/user.js'
 
-    const $q = useQuasar()
+const $q = useQuasar()
 
-    const userStore = useUserStore()
+const userStore = useUserStore()
 
-    const props = defineProps({
-        row: Object
-    })
+/* import html2pdf from 'html2pdf.js'
 
-    async function getContractor(id) {
-        const { data } = await userStore.getUserParams(id)
+function generatePDF() {
+    let element = document.getElementById('element');
+    let opt = {
+        margin: 1,
+        filename: 'myfile.pdf',
+        //image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 4 },
+        //jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().from(element).set(opt).toPdf().save();
+} */
 
-        return data
+const props = defineProps({
+    row: Object
+})
+
+async function getContractor(id) {
+    const { data } = await userStore.getUserParams(id)
+
+    return data
+}
+
+
+function getRoute() {
+
+    let route = ''
+
+    if (goRoute.value.length !== 0 && returnRoute.value.length !== 0) {
+        for (let index = 0; index < goRoute.value.length; index++) {
+            if (index !== goRoute.value.length - 1) {
+                route = route + `${goRoute.value[index].data} - `
+            } else {
+                route = route + `${goRoute.value[index].data}`
+            }
+        }
+
+        for (let index = 0; index < returnRoute.value.length; index++) {
+            // if(index == 0 && goRoute.value[goRoute.value.length - 1].id == returnRoute.value[0].id) {
+            //     console.log('')
+            // } else {
+            route = route + ` - ${returnRoute.value[index].data}`
+            // }
+        }
     }
 
+    return route
 
-    function getRoute() {
+}
 
-        let route = ''
+onBeforeMount(async () => {
+    currentUser.value = $q.localStorage.getItem('user')
 
-        if(goRoute.value.length !== 0 && returnRoute.value.length !== 0) {
-            for(let index = 0; index < goRoute.value.length; index++) {
-                if (index !== goRoute.value.length - 1) {
-                    route = route + `${goRoute.value[index].data} - `
-                } else {
-                    route = route + `${goRoute.value[index].data}`
-                }
-            }
+    const user = await getContractor(props.row.contractor)
 
-            for(let index = 0; index < returnRoute.value.length; index++) {
-                // if(index == 0 && goRoute.value[goRoute.value.length - 1].id == returnRoute.value[0].id) {
-                //     console.log('')
-                // } else {
-                route = route + ` - ${returnRoute.value[index].data}`
-                // }
-            }
-        }
+    console.log(user)
 
-        return route
+    contractor.value = user.name
 
+    identification.value = user.identification
+
+    contract.value = user.contract
+
+    object.value = props.row.contract.object
+
+    currentRegional.value = props.row.contract.regional
+
+    currentInstitute.value = props.row.contract.institute
+
+    createdAt.value = props.row.createdAt
+
+    supervisor.value = props.row.supervisor
+
+    paymaster.value = props.row.paymaster
+
+    regional.value = props.row.regional
+
+    institute.value = props.row.institute
+
+    if (props.row.place !== null) {
+        place.value = [{ data: props.row.place }]
     }
 
-    onBeforeMount(async() => {
-        currentUser.value = $q.localStorage.getItem('user')
+    company.value = props.row.company
 
-        const user = await getContractor(props.row.contractor)
+    companyContact.value = props.row.companyContact
 
-        console.log(user)
+    tripStart.value = props.row.tripStart
 
-        contractor.value = user.name
+    tripEnd.value = props.row.tripEnd
 
-        identification.value = user.identification
+    tripObjective.value = props.row.tripObjective
 
-        contract.value = user.contract
+    duties.value = props.row.duties
 
-        object.value = props.row.contract.object
+    observations.value = props.row.observations
 
-        currentRegional.value = props.row.contract.regional
+    activities.value = props.row.activities
 
-        currentInstitute.value = props.row.contract.institute
+    sign.value = props.row.signature
 
-        createdAt.value = props.row.createdAt
+    goRoute.value = props.row.route.go
 
-        supervisor.value = props.row.supervisor
+    returnRoute.value = props.row.route.return
 
-        paymaster.value = props.row.paymaster
+    for (let index = 0; index < props.row.meanstransport.go.length; index++) {
+        goMeanstransport.value.push({ label: props.row.meanstransport.go[index].data })
+    }
 
-        regional.value = props.row.regional
+    for (let index = 0; index < props.row.meanstransport.return.length; index++) {
+        returnMeanstransport.value.push({ label: props.row.meanstransport.return[index].data })
+    }
+})
 
-        institute.value = props.row.institute
+const currentUser = ref({})
 
-        if(props.row.place !== null) {
-            place.value = [{ data: props.row.place }]
-        }
+const contractor = ref(null)
 
-        company.value = props.row.company
+const identification = ref({})
 
-        companyContact.value = props.row.companyContact
+const createdAt = ref('')
 
-        tripStart.value = props.row.tripStart
-
-        tripEnd.value = props.row.tripEnd
-
-        tripObjective.value = props.row.tripObjective
-
-        duties.value = props.row.duties
-
-        observations.value = props.row.observations
-
-        activities.value = props.row.activities
-
-        sign.value = props.row.signature
-
-        goRoute.value = props.row.route.go
-
-        returnRoute.value = props.row.route.return
-
-        for(let index = 0; index < props.row.meanstransport.go.length; index++) {
-            goMeanstransport.value.push({label: props.row.meanstransport.go[index].data})
-        }
-
-        for(let index = 0; index < props.row.meanstransport.return.length; index++) {
-            returnMeanstransport.value.push({label: props.row.meanstransport.return[index].data})
-        }
-    })
-
-    const currentUser = ref({})
-
-    const contractor = ref(null)
-
-    const identification = ref({})
-
-    const createdAt = ref('')
-
-    const contract = ref({ number: null, date: {
+const contract = ref({
+    number: null, date: {
         start: '',
         end: ''
-    }})
+    }
+})
 
-    const object = ref(null)
+const object = ref(null)
 
-    const currentRegional = ref(null)
+const currentRegional = ref(null)
 
-    const currentInstitute = ref(null)
+const currentInstitute = ref(null)
 
-    const supervisor = ref({})
+const supervisor = ref({})
 
-    const paymaster = ref({})
 
-    const regional = ref(null)
+const paymaster = ref({})
 
-    const institute = ref(null)
+const regional = ref(null)
 
-    const place = ref(null)
+const institute = ref(null)
 
-    const company = ref(null)
+const place = ref(null)
 
-    const companyContact = ref(null)
+const company = ref(null)
 
-    const tripStart = ref('')
+const companyContact = ref(null)
 
-    const tripEnd = ref('')
+const tripStart = ref('')
 
-    const tripObjective = ref(null)
+const tripEnd = ref('')
 
-    const duties = ref([])
+const tripObjective = ref(null)
 
-    const observations = ref([{ data : '' }])
+const duties = ref([])
 
-    const activities = ref([{data: [], date: ''}])
+const observations = ref([{ data: '' }])
 
-    const sign = ref({})
+const activities = ref([{ data: [], date: '' }])
 
-    const goRoute = ref([])
+const sign = ref({})
 
-    const returnRoute = ref([])
+const goRoute = ref([])
 
-    const goMeanstransport = ref([])
+const returnRoute = ref([])
 
-    const returnMeanstransport = ref([])
+const goMeanstransport = ref([])
+
+const returnMeanstransport = ref([])
 </script>
 
 <style scoped>
-    .border-bottom {
-        border-bottom: 1px solid black;
-    }
+.border-bottom {
+    border-bottom: 1px solid black;
+}
 
-    .border-right {
-        border-right: 1px solid black;
-    }
+.border-right {
+    border-right: 1px solid black;
+}
 </style>

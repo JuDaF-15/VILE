@@ -17,7 +17,7 @@ const schemaUser = new mongoose.Schema({
 
     contract: { 
         number: { type: String },
-        date: { start: { type: Date }, end: { type: Date } }
+        date: { start: { type: String }, end: { type: String } }
     },    
 
     object: { type: String },
