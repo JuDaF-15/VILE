@@ -5,9 +5,8 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import * as XLSX from "xlsx/xlsx.mjs";
 import sendEmail from "../middlewares/sendEmail.js"
-import user from '../models/user.js'
 
-const saltRounds = 8
+const saltRounds = 10
 
 console.log(XLSX)
 
@@ -121,7 +120,7 @@ const httpUser = {
         } else if (buscarCedula) {
             return res
                 .status(400)
-                .json({ msg: "Ya existe un usuario con esa cedula", buscarCedula });
+                .json({ msg: "Ya existe un usuario con esa cédula", buscarCedula });
         } /* else if (buscarNumContrato) {
             return res
                 .status(400)

@@ -244,7 +244,7 @@
                 class="col-8 q-my-md">
                 <div v-if="!showReject" class="row justify-around">
                     <q-btn @click="justification = null; showReject = true" :disable='loading' label="Rechazar" />
-                    <q-btn @click="getSign()" :loading="loading" :disable='loading' label="Firmar" />
+                    <q-btn @click="getSign()" :loading="loading" :disable='loading' icon="fa-solid fa-signature" label="Firmar" />
                 </div>
 
                 <div v-show="showReject" class="row">
@@ -442,7 +442,7 @@
                                 <div class="col-10 justify-end flex q-pb-sm q-pr-sm"
                                     style="background-color: whitesmoke;">
                                     <q-btn :disable="sign.contractor !== null || sign.publicWorker !== null"
-                                        @click="getSign()" class="bg-primary text-white" label="Firmar" />
+                                        @click="getSign()" class="bg-primary text-white" icon="fa-solid fa-signature" label="Firmar" />
                                 </div>
                             </div>
                         </div>
@@ -477,14 +477,27 @@ import OtherPreview from '../public/Preview.vue'
 let cargando = ref(false)
 
 function imprimirPagina() {
+    const printableContent = document.getElementById('descargar').innerHTML;
 
-const printableContent = document.getElementById('descargar').innerHTML;
-const originalContent = document.body.innerHTML;
+    // Crear un nuevo elemento div para contener el contenido imprimible
+    const printableDiv = document.createElement('div');
+    printableDiv.innerHTML = printableContent;
 
-document.body.innerHTML = printableContent;
-window.print();
-document.body.innerHTML = originalContent;
-window.location.reload();
+    // Guardar referencia al body original
+    const originalBody = document.body;
+
+    // Crear un nuevo body para la impresión
+    const newBody = document.createElement('body');
+    newBody.innerHTML = printableContent;
+
+    // Reemplazar el body actual con el nuevo body para la impresión
+    document.body = newBody;
+
+    // Ejecutar el comando de impresión
+    window.print();
+
+    // Restaurar el body original después de la impresión
+    document.body = originalBody;
 }
 
 onBeforeMount(async function () {
@@ -671,6 +684,7 @@ async function postLegalization() {
 
         collections.value[index].items = []
     }
+
 
     if (Object.keys(test).length !== 0) {
         await scheduleStore.postLegalization(test, row.value._id)

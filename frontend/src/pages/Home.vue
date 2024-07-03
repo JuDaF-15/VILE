@@ -18,7 +18,7 @@
                 </router-link>
             </q-card>
 
-            <q-card v-if="dataUser === 0" class="my-card" id="cardP">
+            <q-card v-if="dataUser === 0 && role !== 'Administrador'" class="my-card" id="cardP">
                 <router-link to="agenda/contratista/crear" class="cardP">
                     <q-card-section>
                         <div class="text-h6" id="name">Agendas</div>

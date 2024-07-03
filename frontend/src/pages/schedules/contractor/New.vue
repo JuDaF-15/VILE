@@ -73,7 +73,8 @@
                 </q-table> -->
 
                 <!-- TABLA MIA -->
-                <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name" :filter="filter">
+                <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name"
+                    :filter="filter">
                     <template v-slot:top-right>
                         <q-input dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
                             <template v-slot:append>
@@ -163,8 +164,8 @@
 
             <!-- preview -->
             <div v-show="showPreview" class="col-sm-8 col-lg-6 justify-end flex q-mb-md" style="font-size: 12px;">
-                <q-btn @click="showPreview = false; showDialog = true" icon="fa-solid fa-arrow-right" label="Continuar Creación"
-                    class="bg-green text-white" />
+                <q-btn @click="showPreview = false; showDialog = true" icon="fa-solid fa-arrow-right"
+                    label="Continuar Creación" class="bg-green text-white" />
             </div>
 
             <div v-show="showPreview" class="col-12" />
@@ -181,10 +182,11 @@
 
             <!-- dialog -->
             <q-dialog v-model="showDialog">
-                <q-card style="width: 700px;">
+                <q-card style="max-width: 55%;">
                     <q-card-section class="bg-primary justify-between flex z-top" style="position: sticky; top: 0;">
                         <p v-text="labelDialog" class="q-my-none text-white" style="font-size: 25px;" />
-                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye" class="bg-white text-primary" />
+                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye"
+                            class="bg-white text-primary" />
                     </q-card-section>
 
                     <q-space />
@@ -222,383 +224,427 @@
                                 </p>
                             </div>
 
-                            <div class="col-10 q-mt-sm">
-                                <div class="row" style="background-color: whitesmoke;">
-                                    <div class="col-12">
-                                        <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">Ruta
-                                            de Ida</p>
-                                    </div>
-
-                                    <div class="col-12">
-                                        <div class="row q-px-sm">
-                                            <div class="col-auto" v-for="(element, index) in goRoute">
-                                                <q-chip removable :label="element.data"
-                                                    @remove="goRoute.splice(index, 1)" />
+                            <div class="row" style="width: 90%;">
+                                <div class="col-6" style="padding-right: 8px;">
+                                    <div class="col-10 q-mt-md">
+                                        <div class="row" style="background-color: whitesmoke;">
+                                            <div class="col-12">
+                                                <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
+                                                    Ruta
+                                                    de Ida</p>
                                             </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
-                                        <q-btn :disable="loadingCounty" :loading="loadingCounty"
-                                            @click="savegoOption = true" label="+" class="bg-primary text-white" />
-                                    </div>
-
-                                    <div class="col-12" style="background-color: white;">
-                                        <q-menu fit max-width="200px" v-model="savegoOption">
-                                            <div class="row">
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-input filled clearable stack-label
-                                                        :disable="goCounty !== null || goCity !== null"
-                                                        v-model.trim="goOther" label="Otro" />
+                                            <div class="col-12">
+                                                <div class="row q-px-sm">
+                                                    <div class="col-auto" v-for="(element, index) in goRoute">
+                                                        <q-chip removable :label="element.data"
+                                                            @remove="goRoute.splice(index, 1)" />
+                                                    </div>
                                                 </div>
+                                            </div>
 
-                                                <div class="col-12 q-pa-sm q-pt-md">
-                                                    <q-select filled stack-label use-chips use-input
-                                                        :disable="goOther !== null" v-model="goCounty"
-                                                        :options="gocountyOptions" label="Departamento"
-                                                        @filter="function (val, update) { update(() => { gocountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
-                                                        @update:model-value="async (value) => {
-                                                            if (value) {
-                                                                maingoCity = await getCity([value]); gocityOptions = await getCity([value]); goCity = null; loadingCity = false;
-                                                            } else {
-                                                                goCity = null
-                                                                maingoCity.splice(0)
-                                                                gocityOptions.splice(0)
+                                            <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
+                                                <q-btn round :disable="loadingCounty" :loading="loadingCounty"
+                                                    @click="savegoOption = true" size="sm" icon="fa-solid fa-plus"
+                                                    class="bg-primary text-white" />
+                                            </div>
+
+                                            <div class="col-12" style="background-color: white;">
+                                                <q-menu fit max-width="200px" v-model="savegoOption">
+                                                    <div class="row">
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-input filled clearable stack-label
+                                                                :disable="goCounty !== null || goCity !== null"
+                                                                v-model.trim="goOther" label="Otro" />
+                                                        </div>
+
+                                                        <div class="col-12 q-pa-sm q-pt-md">
+                                                            <q-select filled stack-label use-chips use-input
+                                                                :disable="goOther !== null" v-model="goCounty"
+                                                                :options="gocountyOptions" label="Departamento"
+                                                                @filter="function (val, update) { update(() => { gocountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
+                                                                @update:model-value="async (value) => {
+                                                                    if (value) {
+                                                                        maingoCity = await getCity([value]); gocityOptions = await getCity([value]); goCity = null; loadingCity = false;
+                                                                    } else {
+                                                                        goCity = null
+                                                                        maingoCity.splice(0)
+                                                                        gocityOptions.splice(0)
+                                                                    }
+                                                                }" />
+                                                        </div>
+
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-select filled stack-label use-input
+                                                                :disable="goOther !== null || loadingCity"
+                                                                :loading="loadingCity" v-model="goCity"
+                                                                :options="gocityOptions" label="Municipio"
+                                                                @filter="function (val, update) { update(() => { gocityOptions = maingoCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
+                                                        <q-btn @click="() => {
+                                                            if (goOther !== null && goOther !== '') {
+                                                                goRoute.push({ data: goOther, id: null })
+                                                            } else if (goCity !== null) {
+                                                                goRoute.push({ data: goCity.label, id: goCity.data })
                                                             }
-                                                        }" />
-                                                </div>
+                                                            goOther = null
 
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-select filled stack-label use-input
-                                                        :disable="goOther !== null || loadingCity" :loading="loadingCity"
-                                                        v-model="goCity" :options="gocityOptions" label="Municipio"
-                                                        @filter="function (val, update) { update(() => { gocityOptions = maingoCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
-                                                </div>
-                                            </div>
-                                            <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
-                                                <q-btn @click="() => {
-                                                    if (goOther !== null && goOther !== '') {
-                                                        goRoute.push({ data: goOther, id: null })
-                                                    } else if (goCity !== null) {
-                                                        goRoute.push({ data: goCity.label, id: goCity.data })
-                                                    }
-                                                    goOther = null
+                                                            goCounty = null
 
-                                                    goCounty = null
+                                                            gocityOptions.splice(0)
+                                                            maingoCity.splice(0)
 
-                                                    gocityOptions.splice(0)
-                                                    maingoCity.splice(0)
+                                                            goCity = null
 
-                                                    goCity = null
-
-                                                    savegoOption = false
-                                                }" label="AGREGAR" class="bg-primary text-white" />
-                                            </div>
-                                        </q-menu>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-10 q-mt-sm">
-                                <div class="row" style="background-color: whitesmoke;">
-                                    <div class="col-12">
-                                        <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
-                                            Medios de
-                                            Transporte de Ida</p>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="row q-px-sm">
-                                            <div class="col-auto" v-for="(element, index) in goMeanstransport">
-                                                <q-chip removable :label="element.data"
-                                                    @remove="goMeanstransport.splice(index, 1)" />
+                                                            savegoOption = false
+                                                        }" label="AGREGAR" class="bg-primary text-white" />
+                                                    </div>
+                                                </q-menu>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-10 q-mt-md">
+                                        <div class="row" style="background-color: whitesmoke;">
+                                            <div class="col-12">
+                                                <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
+                                                    Ruta
+                                                    de Regreso
+                                                </p>
+                                            </div>
 
-                                    <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
-                                        <q-btn @click="savegoMeanstransport = true; temporarygoMeanstransport = null;"
-                                            label="+" class="bg-primary text-white" />
-                                    </div>
-
-                                    <div class="col-12" style="background-color: white;">
-                                        <q-menu fit v-model="savegoMeanstransport">
-                                            <div class="row">
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-select filled stack-label v-model="temporarygoMeanstransport"
-                                                        :options="meanstransportOptions" label="Medio de Tranporte" />
+                                            <div class="col-12">
+                                                <div class="row q-px-sm">
+                                                    <div class="col-auto" v-for="(element, index) in returnRoute">
+                                                        <q-chip removable :label="element.data"
+                                                            @remove="returnRoute.splice(index, 1)" />
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
-                                                <q-btn @click="() => {
-                                                    if (temporarygoMeanstransport !== null) {
-                                                        goMeanstransport.push({ data: temporarygoMeanstransport.label })
-
-                                                        temporarygoMeanstransport = null
-                                                    }
-
-                                                    savegoMeanstransport = false
-                                                }" label="AGREGAR" class="bg-primary text-white" />
+                                            <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
+                                                <q-btn :disable="loadingCounty" :loading="loadingCounty"
+                                                    @click="savereturnOption = true" size="sm" round icon="fa solid fa-plus"
+                                                    class="bg-primary text-white" />
                                             </div>
-                                        </q-menu>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="col-10 q-mt-lg">
-                                <div class="row" style="background-color: whitesmoke;">
-                                    <div class="col-12">
-                                        <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">Ruta
-                                            de Regreso
-                                        </p>
-                                    </div>
+                                            <div class="col-12" style="background-color: white;">
+                                                <q-menu fit max-width="200px" v-model="savereturnOption">
+                                                    <div class="row">
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-input filled clearable stack-label
+                                                                :disable="returnCounty !== null || returnCity !== null"
+                                                                v-model.trim="returnOther" label="Otro" />
+                                                        </div>
 
-                                    <div class="col-12">
-                                        <div class="row q-px-sm">
-                                            <div class="col-auto" v-for="(element, index) in returnRoute">
-                                                <q-chip removable :label="element.data"
-                                                    @remove="returnRoute.splice(index, 1)" />
-                                            </div>
-                                        </div>
-                                    </div>
+                                                        <div class="col-12 q-pa-sm q-pt-md">
+                                                            <q-select filled stack-label use-chips use-input
+                                                                :disable="returnOther !== null" v-model="returnCounty"
+                                                                :options="returncountyOptions" label="Departamento"
+                                                                @filter="function (val, update) { update(() => { returncountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
+                                                                @update:model-value="async (value) => {
+                                                                    if (value) {
+                                                                        mainreturnCity = await getCity([value]); returncityOptions = await getCity([value]); returnCity = null; loadingCity = false
+                                                                    } else {
+                                                                        returnCity = null
 
-                                    <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
-                                        <q-btn :disable="loadingCounty" :loading="loadingCounty"
-                                            @click="savereturnOption = true" label="+" class="bg-primary text-white" />
-                                    </div>
-
-                                    <div class="col-12" style="background-color: white;">
-                                        <q-menu fit max-width="200px" v-model="savereturnOption">
-                                            <div class="row">
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-input filled clearable stack-label
-                                                        :disable="returnCounty !== null || returnCity !== null"
-                                                        v-model.trim="returnOther" label="Otro" />
-                                                </div>
-
-                                                <div class="col-12 q-pa-sm q-pt-md">
-                                                    <q-select filled stack-label use-chips use-input
-                                                        :disable="returnOther !== null" v-model="returnCounty"
-                                                        :options="returncountyOptions" label="Departamento"
-                                                        @filter="function (val, update) { update(() => { returncountyOptions = mainCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
-                                                        @update:model-value="async (value) => {
-                                                            if (value) {
-                                                                mainreturnCity = await getCity([value]); returncityOptions = await getCity([value]); returnCity = null; loadingCity = false
-                                                            } else {
-                                                                returnCity = null
-
-                                                                mainreturnCity.splice(0)
-                                                                returncityOptions.splice(0)
+                                                                        mainreturnCity.splice(0)
+                                                                        returncityOptions.splice(0)
+                                                                    }
+                                                                }" />
+                                                        </div>
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-select filled stack-label use-input
+                                                                :disable="returnOther !== null || loadingCity"
+                                                                :loading="loadingCity" v-model="returnCity"
+                                                                :options="returncityOptions" label="Municipio"
+                                                                @filter="function (val, update) { update(() => { returncityOptions = mainreturnCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
+                                                        <q-btn @click="() => {
+                                                            if (returnOther !== null && returnOther !== '') {
+                                                                returnRoute.push({ data: returnOther, id: null })
+                                                            } else if (returnCity !== null) {
+                                                                returnRoute.push({ data: returnCity.label, id: returnCity.data })
                                                             }
-                                                        }" />
-                                                </div>
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-select filled stack-label use-input
-                                                        :disable="returnOther !== null || loadingCity"
-                                                        :loading="loadingCity" v-model="returnCity"
-                                                        :options="returncityOptions" label="Municipio"
-                                                        @filter="function (val, update) { update(() => { returncityOptions = mainreturnCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
-                                                </div>
-                                            </div>
-                                            <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
-                                                <q-btn @click="() => {
-                                                    if (returnOther !== null && returnOther !== '') {
-                                                        returnRoute.push({ data: returnOther, id: null })
-                                                    } else if (returnCity !== null) {
-                                                        returnRoute.push({ data: returnCity.label, id: returnCity.data })
-                                                    }
-                                                    returnOther = null
+                                                            returnOther = null
 
-                                                    returnCounty = null
+                                                            returnCounty = null
 
-                                                    mainreturnCity.splice(0)
-                                                    returncityOptions.splice(0)
+                                                            mainreturnCity.splice(0)
+                                                            returncityOptions.splice(0)
 
-                                                    returnCity = null
+                                                            returnCity = null
 
-                                                    savereturnOption = false
-                                                }" label="AGREGAR" class="bg-primary text-white" />
-                                            </div>
-                                        </q-menu>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-10 q-mt-sm">
-                                <div class="row" style="background-color: whitesmoke;">
-                                    <div class="col-12">
-                                        <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
-                                            Medios de
-                                            Transporte de Regreso</p>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="row q-px-sm">
-                                            <div class="col-auto" v-for="(element, index) in returnMeanstransport">
-                                                <q-chip removable :label="element.data"
-                                                    @remove="returnMeanstransport.splice(index, 1)" />
+                                                            savereturnOption = false
+                                                        }" label="AGREGAR" class="bg-primary text-white" />
+                                                    </div>
+                                                </q-menu>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-10 q-mt-md">
+                                        <q-select filled stack-label use-chips use-input
+                                            :disable="place.length !== 0 || loadingCounty" :loading="loadingCounty"
+                                            v-model="regional" :options="regionalOptions"
+                                            label="Dirección General / Regional" @filter="function (val, update, abort) {
+                                                update(() => {
+                                                    const needle = val.toLowerCase()
 
-                                    <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
-                                        <q-btn
-                                            @click="savereturnMeanstransport = true; temporaryreturnMeanstransport = null;"
-                                            label="+" class="bg-primary text-white" />
-                                    </div>
-
-                                    <div class="col-12" style="background-color: white;">
-                                        <q-menu fit v-model="savereturnMeanstransport">
-                                            <div class="row">
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-select filled stack-label v-model="temporaryreturnMeanstransport"
-                                                        :options="meanstransportOptions" label="Medio de Tranporte" />
-                                                </div>
-                                            </div>
-                                            <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
-                                                <q-btn @click="() => {
-                                                    if (temporaryreturnMeanstransport !== null) {
-                                                        returnMeanstransport.push({ data: temporaryreturnMeanstransport.label })
-
-                                                        temporaryreturnMeanstransport = null
-                                                    }
-
-                                                    savereturnMeanstransport = false
-                                                }" label="AGREGAR" class="bg-primary text-white" />
-                                            </div>
-                                        </q-menu>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-10 q-mt-lg">
-                                <q-select filled stack-label use-chips use-input
-                                    :disable="place.length !== 0 || loadingCounty" :loading="loadingCounty"
-                                    v-model="regional" :options="regionalOptions" label="Dirección General / Regional"
-                                    @filter="function (val, update, abort) {
-                                        update(() => {
-                                            const needle = val.toLowerCase()
-
-                                            regionalOptions = mainRegional.filter(element => element.label.toLowerCase().indexOf(needle) > -1)
-                                        })
-                                    }" @update:model-value="async (value) => {
+                                                    regionalOptions = mainRegional.filter(element => element.label.toLowerCase().indexOf(needle) > -1)
+                                                })
+                                            }" @update:model-value="async (value) => {
     await getOptions(value)
 }" />
-                            </div>
-
-                            <div class="col-10 q-mt-sm">
-                                <q-select filled stack-label
-                                    :disable="place.length !== 0 ? true : false || loadingInstitute" v-model="institute"
-                                    :loading="loadingInstitute" :options="instituteOptions" label="Dependencia / Centro" />
-                            </div>
-
-
-                            <div class="col-10 q-mt-md">
-                                <div class="row" style="background-color: whitesmoke;">
-                                    <div class="col-12">
-                                        <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
-                                            Ciudad o País
-                                            Desplazamiento</p>
                                     </div>
+                                </div>
 
-                                    <div class="col-12">
-                                        <div class="row q-px-sm">
-                                            <div class="col-auto" v-for="(element, index) in place">
-                                                <q-chip removable :label="element.data" @remove="place.splice(index, 1)" />
+                                <div class="col-6" style="padding-left: 8px;">
+                                    <div class="col-10 q-mt-md">
+                                        <div class="row" style="background-color: whitesmoke;">
+                                            <div class="col-12">
+                                                <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
+                                                    Medios de
+                                                    Transporte de Ida</p>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="row q-px-sm">
+                                                    <div class="col-auto" v-for="(element, index) in goMeanstransport">
+                                                        <q-chip removable :label="element.data"
+                                                            @remove="goMeanstransport.splice(index, 1)" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
+                                                <q-btn
+                                                    @click="savegoMeanstransport = true; temporarygoMeanstransport = null;"
+                                                    icon="fa solid fa-plus" size="sm" round class="bg-primary text-white" />
+                                            </div>
+
+                                            <div class="col-12" style="background-color: white;">
+                                                <q-menu fit v-model="savegoMeanstransport">
+                                                    <div class="row">
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-select filled stack-label v-model="temporarygoMeanstransport"
+                                                                :options="meanstransportOptions"
+                                                                label="Medio de Tranporte" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
+                                                        <q-btn @click="() => {
+                                                            if (temporarygoMeanstransport !== null) {
+                                                                goMeanstransport.push({ data: temporarygoMeanstransport.label })
+
+                                                                temporarygoMeanstransport = null
+                                                            }
+
+                                                            savegoMeanstransport = false
+                                                        }" label="AGREGAR" class="bg-primary text-white" />
+                                                    </div>
+                                                </q-menu>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
-                                        <q-btn :disable="regional !== null || loadingCounty" :loading="loadingCounty"
-                                            label="+" class="bg-primary text-white" @click="saveplaceOption = true" />
+                                    <div class="col-10 q-mt-md">
+                                        <div class="row" style="background-color: whitesmoke;">
+                                            <div class="col-12">
+                                                <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
+                                                    Medios de
+                                                    Transporte de Regreso</p>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="row q-px-sm">
+                                                    <div class="col-auto" v-for="(element, index) in returnMeanstransport">
+                                                        <q-chip removable :label="element.data"
+                                                            @remove="returnMeanstransport.splice(index, 1)" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
+                                                <q-btn
+                                                    @click="savereturnMeanstransport = true; temporaryreturnMeanstransport = null;"
+                                                    icon="fa solid fa-plus" size="sm" round class="bg-primary text-white" />
+                                            </div>
+
+                                            <div class="col-12" style="background-color: white;">
+                                                <q-menu fit v-model="savereturnMeanstransport">
+                                                    <div class="row">
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-select filled stack-label
+                                                                v-model="temporaryreturnMeanstransport"
+                                                                :options="meanstransportOptions"
+                                                                label="Medio de Tranporte" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
+                                                        <q-btn @click="() => {
+                                                            if (temporaryreturnMeanstransport !== null) {
+                                                                returnMeanstransport.push({ data: temporaryreturnMeanstransport.label })
+
+                                                                temporaryreturnMeanstransport = null
+                                                            }
+
+                                                            savereturnMeanstransport = false
+                                                        }" label="AGREGAR" class="bg-primary text-white" />
+                                                    </div>
+                                                </q-menu>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div class="col-12" style="background-color: white;">
-                                        <q-menu fit max-width="200px" v-model="saveplaceOption">
-                                            <div class="row">
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-input filled stack-label clearable
-                                                        :disable="placeCounty !== null || placeCity !== null"
-                                                        v-model.trim="otherPlace" label="Otro" />
-                                                </div>
-
-                                                <div class="col-12 q-pa-sm q-pt-md">
-                                                    <q-select filled stack-label use-chips use-input
-                                                        :disable="otherPlace !== null" v-model="placeCounty"
-                                                        :options="placecountyOptions" label="Departamento"
-                                                        @filter="function (val, update) { update(() => { placecountyOptions = mainplaceCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
-                                                        @update:model-value="async (value) => {
-                                                            if (value) {
-                                                                mainplaceCity = await getCity([value]); placecityOptions = await getCity([value]); placeCity = null; loadingCity = false
-                                                            } else {
-                                                                placeCity = null
-                                                                mainplaceCity.splice(0)
-                                                                placecityOptions.splice(0)
-                                                            }
-                                                        }" />
-                                                </div>
-                                                <div class="col-12 q-pa-sm">
-                                                    <q-select filled stack-label use-input
-                                                        :disable="otherPlace !== null || loadingCity" :loading="loadingCity"
-                                                        v-model="placeCity" :options="placecityOptions" label="Municipio"
-                                                        @filter="function (val, update) { update(() => { placecityOptions = mainplaceCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
-                                                </div>
-                                            </div>
-                                            <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
-                                                <q-btn @click="() => {
-                                                    if (otherPlace !== null && otherPlace !== '') {
-                                                        place.splice(0)
-                                                        place.push({ data: otherPlace, id: null })
-                                                    } else if (placeCity !== null) {
-                                                        place.splice(0)
-                                                        place.push({ data: placeCity.label, id: placeCity.data })
-                                                    }
-
-                                                    otherPlace = null
-
-                                                    placeCounty = null
-
-                                                    mainplaceCity.splice(0)
-                                                    placecityOptions.splice(0)
-                                                    placeCity = null
-
-                                                    saveplaceOption = false
-                                                }" label="AGREGAR" class="bg-primary text-white" />
-                                            </div>
-                                        </q-menu>
+                                    <div class="col-10 q-mt-md">
+                                        <q-select filled stack-label
+                                            :disable="place.length !== 0 ? true : false || loadingInstitute"
+                                            v-model="institute" :loading="loadingInstitute" :options="instituteOptions"
+                                            label="Dependencia / Centro" />
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-10 q-mt-lg">
-                                <q-input filled stack-label v-model="company" label="Entidad o Empresa" />
+                            <!-- CIUDAD PAIS -->
+                            <div class="row" style="width: 90%;">
+                                <div class="col-12">
+                                    <div class="col-10 q-mt-md">
+                                        <div class="row" style="background-color: whitesmoke;">
+                                            <div class="col-12">
+                                                <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">
+                                                    Ciudad o País
+                                                    Desplazamiento</p>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="row q-px-sm">
+                                                    <div class="col-auto" v-for="(element, index) in place">
+                                                        <q-chip removable :label="element.data"
+                                                            @remove="place.splice(index, 1)" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 q-pr-sm q-pb-sm justify-end flex">
+                                                <q-btn :disable="regional !== null || loadingCounty"
+                                                    :loading="loadingCounty" icon="fa solid fa-plus" size="sm" round
+                                                    class="bg-primary text-white" @click="saveplaceOption = true" />
+                                            </div>
+
+                                            <div class="col-12" style="background-color: white;">
+                                                <q-menu fit max-width="200px" v-model="saveplaceOption">
+                                                    <div class="row">
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-input filled stack-label clearable
+                                                                :disable="placeCounty !== null || placeCity !== null"
+                                                                v-model.trim="otherPlace" label="Otro" />
+                                                        </div>
+
+                                                        <div class="col-12 q-pa-sm q-pt-md">
+                                                            <q-select filled stack-label use-chips use-input
+                                                                :disable="otherPlace !== null" v-model="placeCounty"
+                                                                :options="placecountyOptions" label="Departamento"
+                                                                @filter="function (val, update) { update(() => { placecountyOptions = mainplaceCounty.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }"
+                                                                @update:model-value="async (value) => {
+                                                                    if (value) {
+                                                                        mainplaceCity = await getCity([value]); placecityOptions = await getCity([value]); placeCity = null; loadingCity = false
+                                                                    } else {
+                                                                        placeCity = null
+                                                                        mainplaceCity.splice(0)
+                                                                        placecityOptions.splice(0)
+                                                                    }
+                                                                }" />
+                                                        </div>
+                                                        <div class="col-12 q-pa-sm">
+                                                            <q-select filled stack-label use-input
+                                                                :disable="otherPlace !== null || loadingCity"
+                                                                :loading="loadingCity" v-model="placeCity"
+                                                                :options="placecityOptions" label="Municipio"
+                                                                @filter="function (val, update) { update(() => { placecityOptions = mainplaceCity.filter(element => element.label.toLowerCase().indexOf(val.toLowerCase()) > -1) }) }" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="row justify-end q-pt-sm q-pb-md q-pr-sm">
+                                                        <q-btn @click="() => {
+                                                            if (otherPlace !== null && otherPlace !== '') {
+                                                                place.splice(0)
+                                                                place.push({ data: otherPlace, id: null })
+                                                            } else if (placeCity !== null) {
+                                                                place.splice(0)
+                                                                place.push({ data: placeCity.label, id: placeCity.data })
+                                                            }
+
+                                                            otherPlace = null
+
+                                                            placeCounty = null
+
+                                                            mainplaceCity.splice(0)
+                                                            placecityOptions.splice(0)
+                                                            placeCity = null
+
+                                                            saveplaceOption = false
+                                                        }" label="AGREGAR" class="bg-primary text-white" />
+                                                    </div>
+                                                </q-menu>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-10 q-mt-sm q-mb-lg">
-                                <q-input filled stack-label v-model="companyContact" label="Contacto" />
+
+                            <div class="row" style="width: 90%;">
+                                <div class="col-6" style="padding-right: 8px;">
+                                    <!-- ENTIDAD O EMPRESA -->
+                                    <div class="col-10 q-mt-md">
+                                        <q-input filled stack-label v-model="company" label="Entidad o Empresa" />
+                                    </div>
+                                </div>
+                                <div class="col-6" style="padding-right: 8px;">
+                                    <!-- CONTACTO -->
+                                    <div class="col-10 q-mt-md">
+                                        <q-input filled stack-label v-model="companyContact" label="Contacto" />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-10">
-                                <q-input filled stack-label v-model="tripStart" label="Fecha Inicio Desplazamiento"
-                                    type="date" />
-                            </div>
-                            <div class="col-10 q-mt-sm">
-                                <q-input filled stack-label v-model="tripEnd" label="Fecha Fin Desplazamiento"
-                                    type="date" />
+                            <!-- FECHAS -->
+                            <div class="row" style="width:90%">
+                                <div class="col-6" style="padding-right: 8px;">
+                                    <div class="col-10 q-mt-md">
+                                        <q-input filled stack-label v-model="tripStart" label="Fecha Inicio Desplazamiento"
+                                            type="date" />
+                                    </div>
+                                </div>
+                                <div class="col-6" style="padding-left: 8px;">
+                                    <div class="col-10 q-mt-md">
+                                        <q-input filled stack-label v-model="tripEnd" label="Fecha Fin Desplazamiento"
+                                            type="date" />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div class="col-10 q-mt-lg">
-                                <q-input filled autogrow stack-label v-model="tripObjective"
-                                    label="Objetivo Desplazamiento" />
+                            <div class="row" style="width:90%">
+                                <div class="col-12">
+                                    <div class="col-10 q-mt-md">
+                                        <q-input filled autogrow stack-label v-model="tripObjective"
+                                            label="Objetivo Desplazamiento" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row q-mt-md q-mb-sm">
+                        <br>
+
+                        <!-- OBLIGACIONES -->
+
+                        <div class="row justify-center">
                             <div class="col-12">
                                 <p class="q-my-none text-primary" style="font-size: 18px;">Obligaciones</p>
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-12" style="width: 90%;padding-right:8px">
                                 <template v-for="(element, index) in duties">
                                     <div class="row">
                                         <div class="col-10 q-pa-sm">
@@ -616,13 +662,13 @@
 
                                 </template>
                                 <div class="row justify-end q-mt-sm q-pr-md">
-                                    <q-btn @click="duties.push({})" label="+" sixe="sm" class="bg-primary text-white"
-                                        style="font-size: 14px;" />
+                                    <q-btn @click="duties.push({})" size="sm" round icon="fa solid fa-plus"
+                                        class="bg-primary text-white" style="font-size: 14px;" />
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row q-mt-md q-mb-sm">
+                        <div class="row justify-center">
                             <div class="col-12">
                                 <p class="q-my-none text-primary" style="font-size: 18px;">Actividades</p>
                             </div>
@@ -633,15 +679,13 @@
                                             <p v-text="`Fecha: ${element.date.slice(8)}/${element.date.slice(5, 7)}/${element.date.slice(0, 4)}`"
                                                 class="q-my-sm q-ml-lg" />
                                         </div>
-                                        <div class="col-12">
+                                        <div class="col-12" style="width: 90%">
                                             <template v-for="(item, itemIndex) in element.items">
-                                                <div class="row justify-end">
-                                                    <div class="col-9">
-                                                        <q-input
-                                                            :disable="index == 0 && itemIndex == 0 || index == getActivities.length - 1 && itemIndex == element.items.length - 1"
-                                                            filled stack-label autogrow v-model="item.data"
-                                                            label="Actividad" class="q-my-sm" />
-                                                    </div>
+                                                <div class="col-10 q-pa-sm">
+                                                    <q-input
+                                                        :disable="index == 0 && itemIndex == 0 || index == getActivities.length - 1 && itemIndex == element.items.length - 1"
+                                                        filled stack-label autogrow v-model="item.data" label="Actividad"
+                                                        class="q-my-sm" />
                                                     <div class="col-2 justify-center items-center flex">
                                                         <div class="row">
                                                             <div v-if="index !== 0 && index !== getActivities.length - 1"
@@ -671,7 +715,7 @@
                                         <div class="col-12 justify-end flex">
                                             <q-btn :disable="getActivities[0].date == ''"
                                                 @click="index == getActivities.length - 1 ? element.items.splice(element.items.length - 1, 0, { data: '' }) : element.items.push({ data: '' })"
-                                                label="+" sixe="sm" class="bg-primary text-white q-mr-sm" />
+                                                icon="fa solid fa-plus" round class="bg-primary text-white q-mr-sm" />
                                         </div>
                                     </div>
 
@@ -684,10 +728,10 @@
                                 <p class="q-my-none text-primary" style="font-size: 18px">Observaciones</p>
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-12" style="width: 90%;padding-right:8px">
                                 <template v-for="(element, index) in observations">
                                     <div class="row">
-                                        <div class="col-10 q-pa-sm">
+                                        <div class="col-10 q-pa-sm" style="padding-right: 8px;">
                                             <q-input v-model="element.data" filled autogrow stack-label
                                                 label="Observación" />
                                         </div>
@@ -702,7 +746,7 @@
                                 </template>
 
                                 <div class="row justify-end q-mt-sm q-pr-md">
-                                    <q-btn @click="observations.push({ data: '' })" label="+" size="xs"
+                                    <q-btn @click="observations.push({ data: '' })" icon="fa solid fa-plus" round size="xs"
                                         class="bg-primary text-white" style="font-size: 14px;" />
                                 </div>
                             </div>
@@ -713,7 +757,7 @@
                                 <p class="q-my-none text-primary" style="font-size: 18px;">Firma</p>
                             </div>
 
-                            <div class="col-10 q-mt-sm">
+                            <div class="col-10 q-mt-sm" style="width: 90%;padding-right:8px">
                                 <div class="row" style="background-color: whitesmoke;">
                                     <div class="col-12">
                                         <p class="q-my-none q-pl-sm q-pt-sm" style="font-size: 12px; color: grey;">Firma
@@ -725,8 +769,8 @@
                                         <q-img :src="sign.contractor" style="width: 140px; height: 80px;" />
                                     </div>
                                     <div class="col-12 justify-end flex q-pb-sm q-pr-sm">
-                                        <q-btn :disable="sign.contractor !== null" @click="getSign()" label="Firmar"
-                                            class="bg-primary text-white" />
+                                        <q-btn :disable="sign.contractor !== null" @click="getSign()"
+                                            icon="fa-solid fa-signature" label="Firmar" class="bg-primary text-white" />
                                     </div>
                                 </div>
                             </div>
@@ -738,7 +782,7 @@
                     <q-card-actions class="justify-around">
                         <q-btn @click="cleanDialog()" label="Cerrar" v-close-popup class="bg-red text-white" />
                         <q-btn @click="id == null ? createSchedule() : updateSchedule()" label="Guardar"
-                            class="bg-primary text-white" />
+                            class="bg-primary text-white" :disable="yaFirmo === false" :loading="loading" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -747,7 +791,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue'
+import { ref, computed, onBeforeMount, onMounted } from 'vue'
 
 import { date, useQuasar } from 'quasar'
 
@@ -767,16 +811,38 @@ const userStore = useUserStore()
 
 let cargando = ref(false)
 
+let yaFirmo = ref(false)
+
+let loading = ref(false)
+
+const fechaActual = new Date()
+
+const isoDate = fechaActual.toISOString().split('T')[0];
+
+console.log(isoDate);
 
 function imprimirPagina() {
-
     const printableContent = document.getElementById('descargar').innerHTML;
-    const originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = printableContent;
+    // Crear un nuevo elemento div para contener el contenido imprimible
+    const printableDiv = document.createElement('div');
+    printableDiv.innerHTML = printableContent;
+
+    // Guardar referencia al body original
+    const originalBody = document.body;
+
+    // Crear un nuevo body para la impresión
+    const newBody = document.createElement('body');
+    newBody.innerHTML = printableContent;
+
+    // Reemplazar el body actual con el nuevo body para la impresión
+    document.body = newBody;
+
+    // Ejecutar el comando de impresión
     window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload();
+
+    // Restaurar el body original después de la impresión
+    document.body = originalBody;
 }
 
 async function getCounty(query = {}) {
@@ -822,10 +888,11 @@ async function getSchedule(id, query = {}) {
     return data
 }
 
+
 onBeforeMount(
     async () => {
         cargando.value = true
-        
+
         gocountyOptions.value = await getCounty()
         returncountyOptions.value = await getCounty()
 
@@ -991,15 +1058,15 @@ async function cleanDialog() {
 
     place.value.splice(0)
 
-    company.value = null
+    company.value = ''
 
-    companyContact.value = null
+    companyContact.value = ''
 
     tripStart.value = ''
 
     tripEnd.value = ''
 
-    tripObjective.value = null
+    tripObjective.value = ''
 
     duties.value = [{}]
 
@@ -1012,6 +1079,8 @@ async function cleanDialog() {
     id.value = null
 
     showDialog.value = false
+
+    yaFirmo.value = false
 
     labelDialog.value = 'Crear Agenda'
 }
@@ -1077,7 +1146,8 @@ const status = ref(null)
 let filter = ref('')
 const contractor = ref(null)
 
-const optionsIdentification = ref([{ label: 'Cédula de Ciudadanía', data: 'C.C.' }, { label: 'Cédula de Extranjero', data: 'C.E.' }])
+
+//const optionsIdentification = ref([{ label: 'Cédula de Ciudadanía', data: 'C.C.' }, { label: 'Cédula de Extranjero', data: 'C.E.' }])
 
 const identification = ref({})
 
@@ -1297,6 +1367,8 @@ async function getSign() {
 
             sign.value.contractor = url
 
+            yaFirmo.value = true
+
             showNotify('Agenda Contratista firmada', 'positive', 'check')
         } else {
             showNotify('Error, Firma no encontrada', 'negative')
@@ -1305,93 +1377,168 @@ async function getSign() {
 }
 
 async function createSchedule() {
-    await scheduleStore.postSchedule({
-        contractor: currentUser.value._id,
-        userId: currentUser.value._id,
-        contract: {
-            mail: currentUser.value.mail,
-            number: contract.value.number,
-            date: contract.value.date,
-            contractorName: contractor.value,
-            object: object.value,
-            regional: currentRegional.value.name,
-            institute: currentInstitute.value.name
-        },
-        route: {
-            go: goRoute.value,
-            return: returnRoute.value
-        },
-        meanstransport: {
-            go: goMeanstransport.value,
-            return: returnMeanstransport.value
-        },
-        regional: regional.value !== null ? regional.value.label : null,
-        institute: institute.value !== null ? institute.value.label : null,
-        place: place.value.length !== 0 ? place.value[0].data : null,
-        company: company.value,
-        companyContact: companyContact.value,
-        tripStart: tripStart.value,
-        tripEnd: tripEnd.value,
-        tripObjective: tripObjective.value,
-        duties: duties.value,
-        observations: observations.value,
-        activities: activities.value,
-        supervisor: supervisor.value,
-        paymaster: paymaster.value,
-        signature: {
-            contractor: sign.value.contractor !== null ? sign.value.contractor : null
-        },
-        status: {
-            index: sign.value.contractor !== null ? 1 : null,
-            data: sign.value.contractor !== null ? 'Agenda firmada por Contratista' : 'Agenda Contratista creada',
-            number: 1
-        }
-    })
+    loading.value = true
+    /* console.log("regional " + regional.value);
+    console.log("lugar " + place.value); */
+    if (goRoute.value.length === 0) {
+        showNotify('Falta ruta de ida', 'negative')
+    } else if (goMeanstransport.value.length === 0) {
+        showNotify('Faltan medios de transporte de ida', 'negative')
+    } else if (returnRoute.value.length === 0) {
+        showNotify('Falta ruta de regreso', 'negative')
+    } else if (returnMeanstransport.value.length === 0) {
+        showNotify('Falta medios de transporte de regreso', 'negative')
+    } else if (!regional.value && place.value.length === 0) {
+        showNotify('Falta Dirección General / Regional', 'negative')
+    } else if (!institute.value && place.value.length === 0) {
+        showNotify('Falta Dependencia / Centro', 'negative')
+    } else if (!regional.value && place.value.length === 0) {
+        showNotify('Falta Ciudad o País desplazamiento', 'negative')
+    } else if (company.value === null || !company.value.trim()) {
+        showNotify('Digite la entidad o empresa', 'negative')
+    } else if (companyContact.value === null || !companyContact.value.trim()) {
+        showNotify('Digite el contacto', 'negative')
+    } else if (!tripStart.value) {
+        showNotify('Seleccione la fecha de inicio del desplazamiento', 'negative')
+    } else if (!tripEnd.value) {
+        showNotify('Seleccione la fecha de fin del desplazamiento', 'negative')
+    } else if (tripStart.value < isoDate) {
+        showNotify('La fecha de inicio no puede ser anterior al día de hoy', 'negative')
+    } else if (tripEnd.value < isoDate) {
+        showNotify('La fecha de fin no puede ser anterior al día de hoy', 'negative')
+    } else if (tripObjective.value === null || !tripObjective.value.trim()) {
+        showNotify('Digite el objetivo del viaje/desplazamiento', 'negative')
+    } else if (duties.value.length === 0) {
+        showNotify('No hay obligaciones', 'negative')
+    } else if (observations.value.length === 0) {
+        showNotify('No hay observaciones', 'negative')
+    } else {
+        const { data, status } = await scheduleStore.postSchedule({
+            contractor: currentUser.value._id,
+            userId: currentUser.value._id,
+            contract: {
+                mail: currentUser.value.mail,
+                number: contract.value.number,
+                date: contract.value.date,
+                contractorName: contractor.value,
+                object: object.value,
+                regional: currentRegional.value.name,
+                institute: currentInstitute.value.name
+            },
+            route: {
+                go: goRoute.value,
+                return: returnRoute.value
+            },
+            meanstransport: {
+                go: goMeanstransport.value,
+                return: returnMeanstransport.value
+            },
+            regional: regional.value !== null ? regional.value.label : null,
+            institute: institute.value !== null ? institute.value.label : null,
+            place: place.value.length !== 0 ? place.value[0].data : null,
+            company: company.value,
+            companyContact: companyContact.value,
+            tripStart: tripStart.value,
+            tripEnd: tripEnd.value,
+            tripObjective: tripObjective.value,
+            duties: duties.value,
+            observations: observations.value,
+            activities: activities.value,
+            supervisor: supervisor.value,
+            paymaster: paymaster.value,
+            signature: {
+                contractor: sign.value.contractor !== null ? sign.value.contractor : null
+            },
+            status: {
+                index: sign.value.contractor !== null ? 1 : null,
+                data: sign.value.contractor !== null ? 'Agenda firmada por Contratista' : 'Agenda Contratista creada',
+                number: 1
+            }
+        })
 
-    $q.notify({
-        message: "Agenda Creada, pendiente por aprobación del supervisor",
-        color: "positive",
-        icon: 'check',
-        position: 'bottom',
-        timeout: 4500
-    })
-    await cleanDialog()
+        if (status !== 200) {
+            showNotify(data.msg, 'negative')
+        } else {
+            showNotify('Agenda Creada, pendiente por aprobación del supervisor', 'positive', 'check')
+
+            await cleanDialog()
+        }
+    }
+
+    loading.value = false
 }
 
 async function updateSchedule() {
-    await scheduleStore.putSchedule({
-        route: {
-            go: goRoute.value,
-            return: returnRoute.value
-        },
-        meanstransport: {
-            go: goMeanstransport.value,
-            return: returnMeanstransport.value
-        },
-        regional: regional.value !== null ? regional.value.label : null,
-        institute: institute.value !== null ? institute.value.label : null,
-        place: place.value.length !== 0 ? place.value[0].data : null,
-        company: company.value,
-        companyContact: companyContact.value,
-        tripStart: tripStart.value,
-        tripEnd: tripEnd.value,
-        tripObjective: tripObjective.value,
-        duties: duties.value,
-        observations: observations.value,
-        activities: activities.value,
-        signature: {
-            contractor: sign.value.contractor !== null ? sign.value.contractor : null
-        },
-        status: {
-            index: sign.value.contractor !== null ? 1 : null,
-            data: sign.value.contractor !== null ? 'Agenda firmada por Contratista' : 'Agenda Contratista creada',
-            justification: null,
-            number: 1
-        },
-        createdAt: Date.now()
-    }, id.value)
+    if (goRoute.value.length === 0) {
+        showNotify('Falta ruta de ida', 'negative')
+    } else if (goMeanstransport.value.length === 0) {
+        showNotify('Faltan medios de transporte de ida', 'negative')
+    } else if (returnRoute.value.length === 0) {
+        showNotify('Falta ruta de regreso', 'negative')
+    } else if (returnMeanstransport.value.length === 0) {
+        showNotify('Falta medios de transporte de regreso', 'negative')
+    } else if (!regional.value && place.value.length === 0) {
+        showNotify('Falta Dirección General / Regional', 'negative')
+    } else if (!institute.value && place.value.length === 0) {
+        showNotify('Falta Dependencia / Centro', 'negative')
+    } else if (!regional.value && place.value.length === 0) {
+        showNotify('Falta Ciudad o País desplazamiento', 'negative')
+    } else if (company.value === null || !company.value.trim()) {
+        showNotify('Digite la entidad o empresa', 'negative')
+    } else if (companyContact.value === null || !companyContact.value.trim()) {
+        showNotify('Digite el contacto', 'negative')
+    } else if (!tripStart.value) {
+        showNotify('Seleccione la fecha de inicio del desplazamiento', 'negative')
+    } else if (!tripEnd.value) {
+        showNotify('Seleccione la fecha de fin del desplazamiento', 'negative')
+    } else if (tripStart.value < isoDate) {
+        showNotify('La fecha de inicio no puede ser anterior al día de hoy', 'negative')
+    } else if (tripEnd.value < isoDate) {
+        showNotify('La fecha de fin no puede ser anterior al día de hoy', 'negative')
+    } else if (tripObjective.value === null || !tripObjective.value.trim()) {
+        showNotify('Digite el objetivo del viaje/desplazamiento', 'negative')
+    } else if (duties.value.length === 0) {
+        showNotify('No hay obligaciones', 'negative')
+    } else if (observations.value.length === 0) {
+        showNotify('No hay observaciones', 'negative')
+    } else {
+        await scheduleStore.putSchedule({
+            route: {
+                go: goRoute.value,
+                return: returnRoute.value
+            },
+            meanstransport: {
+                go: goMeanstransport.value,
+                return: returnMeanstransport.value
+            },
+            regional: regional.value !== null ? regional.value.label : null,
+            institute: institute.value !== null ? institute.value.label : null,
+            place: place.value.length !== 0 ? place.value[0].data : null,
+            company: company.value,
+            companyContact: companyContact.value,
+            tripStart: tripStart.value,
+            tripEnd: tripEnd.value,
+            tripObjective: tripObjective.value,
+            duties: duties.value,
+            observations: observations.value,
+            activities: activities.value,
+            signature: {
+                contractor: sign.value.contractor !== null ? sign.value.contractor : null
+            },
+            status: {
+                index: sign.value.contractor !== null ? 1 : null,
+                data: sign.value.contractor !== null ? 'Agenda firmada por Contratista' : 'Agenda Contratista creada',
+                justification: null,
+                number: 1
+            },
+            createdAt: Date.now()
+        }, id.value)
 
-    await cleanDialog()
+        showNotify('Agenda modificada y enviada correctamente', 'positive', 'check')
+
+        await cleanDialog()
+    }
+
 }
 </script>
 

@@ -218,13 +218,13 @@
             </div>
 
             <div class="col-8 justify-end  flex q-mb-md">
-                <q-btn @click="row = null; showOther = false; showPreview = false" icon="fa-solid fa-arrow-left" label="Atrás"
-                    class="bg-green text-white" />
+                <q-btn @click="row = null; showOther = false; showPreview = false" icon="fa-solid fa-arrow-left"
+                    label="Atrás" class="bg-green text-white" />
             </div>
 
             <div class="col-12" />
 
-            <div id="descargar">
+            <div id="descargar" style="width:65%">
                 <Preview v-if="!showOther" :row="row" />
 
                 <OtherPreview v-else :row="row" />
@@ -236,16 +236,16 @@
             <div v-if="!showReject" class="col-6 q-mt-md">
                 <div v-if="user.role.data == 'supervisor' || user.role.data == 'paymaster'" class="row">
                     <div class="col-12 justify-around flex">
-                        <q-btn @click="showReject = !showReject" label="Rechazar" class="bg-red text-white" />
+                        <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-x" class="bg-red text-white" />
 
-                        <q-btn @click="getSign()" label="Firmar" class="bg-green text-white" />
+                        <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-green text-white" />
 
                     </div>
                 </div>
 
                 <div v-else class="row">
                     <div class="col-12 q-pa-sm">
-                        <q-input v-model="tripOrder" filled stack-label label="Número Orden de Viaje" />
+                        <q-input v-model="tripOrder" type="number" filled stack-label label="Número Orden de Viaje" />
                     </div>
 
                     <div align="right" class="col-12 q-pa-sm">
@@ -309,14 +309,27 @@ const $q = useQuasar()
 let cargando = ref(false)
 
 function imprimirPagina() {
-
     const printableContent = document.getElementById('descargar').innerHTML;
-    const originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = printableContent;
+    // Crear un nuevo elemento div para contener el contenido imprimible
+    const printableDiv = document.createElement('div');
+    printableDiv.innerHTML = printableContent;
+
+    // Guardar referencia al body original
+    const originalBody = document.body;
+
+    // Crear un nuevo body para la impresión
+    const newBody = document.createElement('body');
+    newBody.innerHTML = printableContent;
+
+    // Reemplazar el body actual con el nuevo body para la impresión
+    document.body = newBody;
+
+    // Ejecutar el comando de impresión
     window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload();
+
+    // Restaurar el body original después de la impresión
+    document.body = originalBody;
 }
 
 
@@ -499,9 +512,13 @@ async function updateSchedule(id) {
 
         row.value = null
 
+        showNotify('Agenda Rechazada', 'info', 'info')
+
         showPreview.value = false
     } else {
-        if (user.value.role.data == 'administrator' && tripOrder.value !== null) {
+        if (user.value.role.data == 'administrator' && !tripOrder.value) {
+            showNotify('Digite el número de orden de viaje', 'negative')
+        } else if (user.value.role.data == 'administrator' && tripOrder.value !== null) {
             const { status } = row.value
 
             status.index = 4
@@ -511,6 +528,7 @@ async function updateSchedule(id) {
             console.log(status)
 
             await scheduleStore.putSchedule({
+                userId: user.value.id,
                 tripOrder: tripOrder.value,
                 status: status
             }, id)

@@ -24,13 +24,14 @@ const httpSchedule = {
         try {
 
             const existingSchedule = await Schedule.findOne({
+                userId: req.body.userId,
                 $or: [
                     { tripStart: { $gte: req.body.tripStart, $lte: req.body.tripEnd }, tripEnd: { $gte: req.body.tripEnd, $lte: req.body.tripEnd } }
                 ],
             })
 
             if (existingSchedule) {
-                return res.status(400).json({ msg: 'Ya existe una agenda que con exactamente las mismas fechas' });
+                return res.status(400).json({ msg: 'Ya existe una agenda con exactamente las mismas fechas' });
             }
 
             await schedule.save()
@@ -585,6 +586,51 @@ const httpSchedule = {
                 }
             });
 
+        } else if (req.body.status.data === 'Agenda en Proceso de Legalización') {
+            // Obtener el paymaster que modificó la agenda
+            const admin = await User.findById(req.body.userId)
+
+            // NOTIFICAR AL CREADOR
+
+            let mailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.mail,
+                subject: 'Legalización Creada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">LEGALIZACIÓN CREADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
+                    <p style="font-size: 16px; color: #333;">El administrador <strong>${admin.name}</strong> ha creado la legalización de su agenda con
+                    número de orden de viaje <strong>${schedule.tripOrder}</strong>. Queda pendiente por que usted agregue las evidencias y/o soportes y conclusiones y que la firme</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+
+            };
+
+            sendEmail.sendMail(mailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo de legalización...', error);
+                } else {
+                    console.log('Correo de legalización enviado correctamente');
+                }
+            });
+            
         }
 
         return res.status(200).json({ msg: 'Agenda modificada' })
