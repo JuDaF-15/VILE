@@ -78,6 +78,13 @@ const httpUser = {
     },
 
     postUser: async (req, res) => {
+
+        Object.keys(req.body).forEach(key => {
+            if (typeof req.body[key] === 'string') {
+                req.body[key] = req.body[key].trim();
+            }
+        });
+
         const data = {
             name: req.body.name, mail: req.body.mail, identification: req.body.identification,
             role: req.body.role, position: req.body.position, branch: req.body.branch, paymaster: req.body.paymaster, staffType: req.body.staffType
@@ -106,13 +113,14 @@ const httpUser = {
         }
         const user = new User(data)
 
+        
         const buscarCedula = await User.findOne({ identification: req.body.identification });
         const buscarCorreo = await User.findOne({ mail: req.body.mail });
         /* const buscarNumContrato = await User.findOne({ 
             'staffType.data': 'contractor',
             'contract.number': req.body.contract.number  // Aquí especificas la condición adicional para el rol
         }); */
-        
+
         if (buscarCorreo) {
             return res
                 .status(400)
