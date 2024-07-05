@@ -159,7 +159,7 @@
 
             <!-- preview -->
             <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
-                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+                <q-btn @click="descargarFormatoPDF" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
             </div>
 
             <!-- preview -->
@@ -170,7 +170,7 @@
 
             <div v-show="showPreview" class="col-12" />
 
-            <div id="descargar" style="width:65%">
+            <div id="invoice" ref="invoice" style="width:65%">
                 <Preview v-if="showPreview == true" :row="row" />
 
                 <div v-show="showPreview" class="col-12" />
@@ -780,8 +780,8 @@
                     <q-separator />
 
                     <q-card-actions class="justify-around">
-                        <q-btn @click="cleanDialog()" label="Cerrar" v-close-popup class="bg-red text-white" />
-                        <q-btn @click="id == null ? createSchedule() : updateSchedule()" label="Guardar"
+                        <q-btn @click="cleanDialog()" label="Cerrar" v-close-popup icon="fa-solid fa-xmark" class="bg-red text-white" />
+                        <q-btn @click="id == null ? createSchedule() : updateSchedule()" icon="fa-solid fa-floppy-disk" label="Guardar"
                             class="bg-primary text-white" :disable="yaFirmo === false" :loading="loading" />
                     </q-card-actions>
                 </q-card>
@@ -791,7 +791,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount, onMounted } from 'vue'
+import { ref, computed, onBeforeMount } from 'vue'
 
 import { date, useQuasar } from 'quasar'
 
@@ -802,6 +802,9 @@ import { showNotify } from '../../../components/notify.js'
 import Preview from './Preview.vue'
 
 import { useUserStore } from '../../../stores/user'
+
+import { jsPDF } from "jspdf";
+
 
 const $q = useQuasar()
 
@@ -819,30 +822,46 @@ const fechaActual = new Date()
 
 const isoDate = fechaActual.toISOString().split('T')[0];
 
-console.log(isoDate);
+const invoice = ref(null)
 
-function imprimirPagina() {
-    const printableContent = document.getElementById('descargar').innerHTML;
+function descargarFormatoPDF() {
+    const notif = $q.notify({
+        type: 'ongoing',
+        message: 'Generando PDF...'
+    })
 
-    // Crear un nuevo elemento div para contener el contenido imprimible
-    const printableDiv = document.createElement('div');
-    printableDiv.innerHTML = printableContent;
+    const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Guardar referencia al body original
-    const originalBody = document.body;
+    // Obtener el HTML del div con la referencia
+    const invoiceElement = invoice.value
 
-    // Crear un nuevo body para la impresión
-    const newBody = document.createElement('body');
-    newBody.innerHTML = printableContent;
+    // Guardar el ancho original del elemento
+    const originalWidth = invoiceElement.style.width;
 
-    // Reemplazar el body actual con el nuevo body para la impresión
-    document.body = newBody;
+    // Establecer un ancho fijo para el contenido
+    invoiceElement.style.width = '915px'; 
 
-    // Ejecutar el comando de impresión
-    window.print();
-
-    // Restaurar el body original después de la impresión
-    document.body = originalBody;
+    // Convertir el HTML a PDF usando jsPDF
+    doc.html(invoiceElement, {
+        callback: function (doc) {
+            // Restaurar el ancho original del elemento
+            invoiceElement.style.width = originalWidth;
+            doc.save('formatoContratista.pdf');
+            notif({
+                type: 'positive',
+                message: 'Formato en PDF descargado',
+                timeout: 1300
+            })
+        },
+        x: 20,
+        y: 20,
+        html2canvas: {
+            scale: 0.56,
+        },
+        margin: [20, 20, 20, 20],
+        autoPaging: 'text',
+        width: 500 // Ajusta el ancho del contenido si es necesario
+    });
 }
 
 async function getCounty(query = {}) {
@@ -1546,8 +1565,13 @@ async function updateSchedule() {
 .border-bottom {
     border-bottom: 1px solid black;
 }
-
 .border-right {
     border-right: 1px solid black;
+}
+
+#invoice {
+    font-family: Arial, sans-serif;
+    word-spacing: 1px;
+    /* Ajusta el espaciado entre palabras */
 }
 </style>

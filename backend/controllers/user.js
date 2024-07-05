@@ -113,7 +113,7 @@ const httpUser = {
         }
         const user = new User(data)
 
-        
+
         const buscarCedula = await User.findOne({ identification: req.body.identification });
         const buscarCorreo = await User.findOne({ mail: req.body.mail });
         /* const buscarNumContrato = await User.findOne({ 
@@ -151,7 +151,7 @@ const httpUser = {
                     <p style="font-size: 16px; font-weight:bold;color: #333">BIENVENIDO(A) A VILE</p>
                     <img src="cid:bienvenida" alt="Bienvenida" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
                     <p style="font-size: 16px; font-weight:bold;color: #333">Hola ${user.name},</p>
-                    <p style="font-size: 16px; color: #333;">Ha sido registrado(a) en la plataforma VILE (Viajes y Legalizaciones) del Centro Agroturístico. Estas son sus
+                    <p style="font-size: 16px; color: #333;">Ha sido registrado(a) en la plataforma VILE (Viajes y Legalizaciones) del Centro Agroturístico con el rol de <strong>${user}. Estas son sus
                     credenciales de acceso:</p>
                     <p style="font-size:16px;color: #333;"><strong>No. de documento: </strong>${user.identification}</p>
                     <p style="font-size:16px;color: #333;"><strong>Contraseña: </strong>${req.body.password}</strong></p>
@@ -471,12 +471,11 @@ const httpUser = {
             }
 
             let msg = "Por favor consulte su correo electrónico (incluida su bandeja de spam / correo no deseado)";
-            let link;
             const token = jwt.sign({ id: usuario.id },
                 process.env.PRIVATE_KEY_MAIL,
-                { expiresIn: '15m' }
+                { expiresIn: '20m' }
             );
-            link = `${process.env.CLIENT_URL}#/nueva/contrasena?reset=${token}`;
+            const link = `${process.env.CLIENT_URL}/#/nueva/contrasena?reset=${token}`;
             usuario.recuperacion = token;
             await usuario.save();
             try {
@@ -489,7 +488,7 @@ const httpUser = {
                     <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
                     <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
                     </div><br />
-                    <p style="font-size: 16px; font-weight:bold;color: #333">RECUPERACION DE CONTRASEÑA</p>
+                    <p style="font-size: 16px; font-weight:bold;color: #333">RECUPERACIÓN DE CONTRASEÑA</p>
                     <img src="cid:restablecer" alt="Restablecer contraseña" style="display: block; margin: 0 auto; max-width: 20%; height: auto;">
                     <p style="font-size: 16px; font-weight:bold; color:#333">Hola ${usuario.name},</p>
                     <p style="font-size: 16px; color: #333;">Se ha recibido una solicitud para restablecer su contraseña. Por favor, haga clic en el botón para comenzar:</p>
@@ -515,7 +514,7 @@ const httpUser = {
                 console.log('error al enviar correo de restablecimiento', error);
                 return res.status(400).json({ msg: 'Ha ocurrido un error' })
             }
-            return res.status(202).json({ msg, link })
+            return res.status(202).json({ msg, link, token })
         } catch (error) {
             console.log('ERROR 1', error);
             return res.status(500).json({ msg: 'Ha ocurrido un error' })
@@ -531,13 +530,13 @@ const httpUser = {
         try {
             const usuario = await User.findOne({ recuperacion: recuperacion });
             if (!usuario) {
-                return res.status(404).json({ msg: 'Token Invalido' })
+                return res.status(404).json({ msg: 'Token inválido' })
             };
 
             const jtoken = jwt.verify(recuperacion, process.env.PRIVATE_KEY_MAIL);
             console.log(jtoken);
             if (!jtoken) {
-                return res.status(400).json({ msg: 'Token invalido' })
+                return res.status(400).json({ msg: 'Token inválido' })
             }
 
             if (typeof nuevaContrasena !== 'string') {

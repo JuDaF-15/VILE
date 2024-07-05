@@ -1,5 +1,5 @@
 <template>
-    <div class="col-6" style="border: 2px solid black" id="element">
+    <div class="col-6" style="border: 2px solid black" id="invoice">
         <div class="row" style="border-bottom: 1px solid black;">
             <div class="col-2 justify-center flex q-py-xs" style="border-right: 1px solid black">
                 <q-img src="../../../assets/sena-icono-nuevo.png" fit="contain" style="height: 70px; width: 70px;" />
@@ -373,6 +373,15 @@ const userStore = useUserStore()
 
 const $q = useQuasar()
 
+/* function downloadInvoice() {
+    var invoice = document.getElementById('invoice').outerHTML;
+    var blob = new Blob([invoice], { type: 'text/html' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'formato.pdf';
+    link.click();
+} */
+
 onBeforeMount(async function () {
     user.value = $q.localStorage.getItem('user')
 
@@ -463,4 +472,5 @@ const collections = ref([])
 
 .border-right {
     border-right: 1px solid black;
-}</style>
+}
+</style>

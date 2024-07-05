@@ -52,7 +52,7 @@
                                     <q-input v-model="file" filled type="file" />
                                 </div>
                                 <div class="col-12 justify-end flex">
-                                    <q-btn @click="putSign()" :disable="loading" :loading="loading" color="primary" label="Subir" />
+                                    <q-btn @click="putSign()" :disable="loading" :loading="loading" icon="upload" class="bg-blue text-white" label="Subir" />
                                 </div>
                             </div>
                         </div>

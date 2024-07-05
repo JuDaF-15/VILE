@@ -214,7 +214,7 @@
         <div v-else class="row justify-center q-my-md">
 
             <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
-                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+                <q-btn @click="descargarFormatoPDF" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
             </div>
 
             <div class="col-8 justify-end  flex q-mb-md">
@@ -224,7 +224,7 @@
 
             <div class="col-12" />
 
-            <div id="descargar" style="width:65%">
+            <div id="invoice" ref="invoice" style="width:65%">
                 <Preview v-if="!showOther" :row="row" />
 
                 <OtherPreview v-else :row="row" />
@@ -236,7 +236,8 @@
             <div v-if="!showReject" class="col-6 q-mt-md">
                 <div v-if="user.role.data == 'supervisor' || user.role.data == 'paymaster'" class="row">
                     <div class="col-12 justify-around flex">
-                        <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-x" class="bg-red text-white" />
+                        <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-x"
+                            class="bg-red text-white" />
 
                         <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-green text-white" />
 
@@ -272,33 +273,18 @@
 </template>
 
 <script setup>
+
 import { ref, onBeforeMount } from 'vue'
 import { useScheduleStore } from '../../stores/schedule.js'
 import { showNotify } from '../../components/notify.js'
 import { useUserStore } from '../../stores/user.js'
-
-/* import html2pdf from 'html2pdf.js'
-
-function generatePDF() {
-    html2pdf(document.getElementById('element'),{
-        margin: 10,
-        filename: 'downloaded'
-    })
-}
-
-function generatePDF_publicworker() {
-    html2pdf(document.getElementById('element2'),{
-        margin: 10,
-        filename: 'downloaded'
-    })
-} */
+import { useQuasar } from 'quasar'
+import { jsPDF } from "jspdf";
 
 
 import Preview from './contractor/Preview.vue'
 
 import OtherPreview from './public/Preview.vue'
-
-import { useQuasar } from 'quasar'
 
 const scheduleStore = useScheduleStore()
 
@@ -308,30 +294,47 @@ const $q = useQuasar()
 
 let cargando = ref(false)
 
-function imprimirPagina() {
-    const printableContent = document.getElementById('descargar').innerHTML;
+const invoice = ref(null)
 
-    // Crear un nuevo elemento div para contener el contenido imprimible
-    const printableDiv = document.createElement('div');
-    printableDiv.innerHTML = printableContent;
+function descargarFormatoPDF() {
+    const notif = $q.notify({
+        type: 'ongoing',
+        message: 'Generando PDF...'
+    })
 
-    // Guardar referencia al body original
-    const originalBody = document.body;
+    const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Crear un nuevo body para la impresión
-    const newBody = document.createElement('body');
-    newBody.innerHTML = printableContent;
+    // Obtener el HTML del div con la referencia
+    const invoiceElement = invoice.value
 
-    // Reemplazar el body actual con el nuevo body para la impresión
-    document.body = newBody;
+    // Guardar el ancho original del elemento
+    const originalWidth = invoiceElement.style.width;
 
-    // Ejecutar el comando de impresión
-    window.print();
+    // Establecer un ancho fijo para el contenido
+    invoiceElement.style.width = '915px'; // Ajusta este valor según tus necesidades
 
-    // Restaurar el body original después de la impresión
-    document.body = originalBody;
+    // Convertir el HTML a PDF usando jsPDF
+    doc.html(invoiceElement, {
+        callback: function (doc) {
+            // Restaurar el ancho original del elemento
+            invoiceElement.style.width = originalWidth;
+            doc.save('formato.pdf');
+            notif({
+                type: 'positive',
+                message: 'Formato en PDF descargado',
+                timeout: 1300
+            })
+        },
+        x: 20,
+        y: 20,
+        html2canvas: {
+            scale: 0.56,
+        },
+        margin: [20, 20, 20, 20],
+        autoPaging: 'text',
+        width: 500 // Ajusta el ancho del contenido si es necesario
+    });
 }
-
 
 onBeforeMount(async () => {
     user.value = $q.localStorage.getItem('user')
@@ -405,8 +408,6 @@ async function getSign() {
         }
 
         row.value = null
-
-        imprimirPagina()
 
         showNotify('Agenda firmada', 'positive', 'check')
 
@@ -556,4 +557,14 @@ const showReject = ref(false)
 const justification = ref(null)
 
 const tripOrder = ref(null)
+
 </script>
+
+
+<style scoped>
+#invoice {
+    font-family: Arial, sans-serif;
+    word-spacing: 1px;
+    /* Ajusta el espaciado entre palabras */
+}
+</style>

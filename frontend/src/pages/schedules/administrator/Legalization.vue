@@ -98,20 +98,21 @@
 </q-table> -->
 
                 <!-- TABLA MIA -->
-                <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name" :filter="filter">
+                <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name"
+                    :filter="filter">
                     <template v-slot:body-cell-opciones="props">
                         <q-td :props="props">
                             <q-icon @click="function () {
-                row = props.row
-                if (user.role.data == 'user' || props.row.typeSchedule == 'commission' && user.role.data !== 'administrator') {
-                    showDialog = true
-                } else {
-                    if (user.role.data == 'administrator' && props.row.typeSchedule == 'commission') {
-                        showOther = true
-                    }
-                    showPreview = true
-                }
-            }" name="fa-solid fa-eye" size="20px" color="blue">
+                                row = props.row
+                                if (user.role.data == 'user' || props.row.typeSchedule == 'commission' && user.role.data !== 'administrator') {
+                                    showDialog = true
+                                } else {
+                                    if (user.role.data == 'administrator' && props.row.typeSchedule == 'commission') {
+                                        showOther = true
+                                    }
+                                    showPreview = true
+                                }
+                            }" name="fa-solid fa-eye" size="20px" color="blue">
                                 <q-tooltip>
                                     Ver y Firmar
                                 </q-tooltip>
@@ -214,26 +215,26 @@
             </div>
 
             <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
-                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+                <q-btn @click="descargarFormatoPDF" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
             </div>
 
             <div v-if="showPreview" class="col-8 justify-end  flex q-mb-md">
                 <q-btn @click="function () {
-                if (user.role.data == 'user' || row.typeSchedule == 'commission' && user.role.data !== 'administrator') {
-                    showPreview = false
-                    showOther = false
-                    showDialog = true
-                } else {
-                    showPreview = false
-                    showOther = false
-                }
-            }" label="Atrás" icon="fa-solid fa-arrow-left" class="bg-red text-white" />
+                    if (user.role.data == 'user' || row.typeSchedule == 'commission' && user.role.data !== 'administrator') {
+                        showPreview = false
+                        showOther = false
+                        showDialog = true
+                    } else {
+                        showPreview = false
+                        showOther = false
+                    }
+                }" label="Atrás" icon="fa-solid fa-arrow-left" class="bg-red text-white" />
             </div>
 
             <div class="col-12" />
 
             <div v-if="showPreview">
-                <div id="descargar">
+                <div id="invoice" ref="invoice" style="width: 65%;">
                     <Preview v-if="!showOther" :row="row" />
 
                     <OtherPreview v-if="showOther" :row="row" />
@@ -244,7 +245,8 @@
                 class="col-8 q-my-md">
                 <div v-if="!showReject" class="row justify-around">
                     <q-btn @click="justification = null; showReject = true" :disable='loading' label="Rechazar" />
-                    <q-btn @click="getSign()" :loading="loading" :disable='loading' icon="fa-solid fa-signature" label="Firmar" />
+                    <q-btn @click="getSign()" :loading="loading" :disable='loading' icon="fa-solid fa-signature"
+                        label="Firmar" />
                 </div>
 
                 <div v-show="showReject" class="row">
@@ -264,7 +266,8 @@
                     <q-card-section class="justify-between flex bg-primary">
                         <p v-text="'Crear Legalización'" class="q-my-none text-white" style="font-size: 25px;" />
 
-                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye" class="bg-white text-primary" />
+                        <q-btn @click="getPreview()" label="Vista Previa" icon="fa-solid fa-eye"
+                            class="bg-white text-primary" />
                     </q-card-section>
 
                     <q-space />
@@ -292,18 +295,15 @@
                     <q-card-section>
 
                         <div class="row">
-                            <div v-if="currentUser.staffType && currentUser.staffType.data == 'contractor'"
-                                class="col-12">
+                            <div v-if="currentUser.staffType && currentUser.staffType.data == 'contractor'" class="col-12">
                                 <p class="q-my-none text-primary" style="font-size: 18px;">Resultados</p>
                             </div>
 
-                            <div v-if="currentUser.staffType && currentUser.staffType.data == 'contractor'"
-                                class="col-12">
+                            <div v-if="currentUser.staffType && currentUser.staffType.data == 'contractor'" class="col-12">
                                 <template v-for="(element, index) in results">
                                     <div class="row q-mt-sm">
                                         <div class="col-10 q-px-sm">
-                                            <q-input v-model="element.data" filled stack-label autogrow
-                                                label="Resultado" />
+                                            <q-input v-model="element.data" filled stack-label autogrow label="Resultado" />
                                         </div>
 
                                         <div v-if="index !== 0" class="col-2 items-center flex">
@@ -349,8 +349,8 @@
                                 </div>
 
                                 <div class="row justify-end q-mt-sm q-pr-md">
-                                    <q-btn @click="collections.push({ name: '', items: [], keys: [] })" label="+"
-                                        size="sm" class="bg-primary text-white" style="font-size: 14px;" />
+                                    <q-btn @click="collections.push({ name: '', items: [], keys: [] })" label="+" size="sm"
+                                        class="bg-primary text-white" style="font-size: 14px;" />
                                 </div>
                             </div>
 
@@ -406,7 +406,8 @@
                             <template v-for="(element, index) in conclusions">
                                 <div class="row q-mt-sm">
                                     <div class="col-10 q-px-sm">
-                                        <q-input type="textarea" v-model="element.data" filled stack-label label="Conclusión" />
+                                        <q-input type="textarea" v-model="element.data" filled stack-label
+                                            label="Conclusión" />
                                     </div>
 
                                     <div v-if="index !== 0" class="col-2 items-center flex">
@@ -439,10 +440,10 @@
                                         style="width: 140px; height: 80px;" />
                                 </div>
 
-                                <div class="col-10 justify-end flex q-pb-sm q-pr-sm"
-                                    style="background-color: whitesmoke;">
+                                <div class="col-10 justify-end flex q-pb-sm q-pr-sm" style="background-color: whitesmoke;">
                                     <q-btn :disable="sign.contractor !== null || sign.publicWorker !== null"
-                                        @click="getSign()" class="bg-primary text-white" icon="fa-solid fa-signature" label="Firmar" />
+                                        @click="getSign()" class="bg-primary text-white" icon="fa-solid fa-signature"
+                                        label="Firmar" />
                                 </div>
                             </div>
                         </div>
@@ -464,11 +465,11 @@
 <script setup>
 import { ref, onBeforeMount } from 'vue'
 import { useQuasar } from 'quasar'
-
 import { showNotify } from '../../../components/notify.js'
-
 import { useScheduleStore } from '../../../stores/schedule.js'
 import { useUserStore } from '../../../stores/user.js'
+import { jsPDF } from "jspdf";
+
 
 import Preview from './Preview.vue'
 
@@ -476,28 +477,46 @@ import OtherPreview from '../public/Preview.vue'
 
 let cargando = ref(false)
 
-function imprimirPagina() {
-    const printableContent = document.getElementById('descargar').innerHTML;
+const invoice = ref(null)
 
-    // Crear un nuevo elemento div para contener el contenido imprimible
-    const printableDiv = document.createElement('div');
-    printableDiv.innerHTML = printableContent;
+function descargarFormatoPDF() {
+    const notif = $q.notify({
+        type: 'ongoing',
+        message: 'Generando PDF...'
+    })
 
-    // Guardar referencia al body original
-    const originalBody = document.body;
+    const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Crear un nuevo body para la impresión
-    const newBody = document.createElement('body');
-    newBody.innerHTML = printableContent;
+    // Obtener el HTML del div con la referencia
+    const invoiceElement = invoice.value
 
-    // Reemplazar el body actual con el nuevo body para la impresión
-    document.body = newBody;
+    // Guardar el ancho original del elemento
+    const originalWidth = invoiceElement.style.width;
 
-    // Ejecutar el comando de impresión
-    window.print();
+    // Establecer un ancho fijo para el contenido
+    invoiceElement.style.width = '915px'; // Ajusta este valor según tus necesidades
 
-    // Restaurar el body original después de la impresión
-    document.body = originalBody;
+    // Convertir el HTML a PDF usando jsPDF
+    doc.html(invoiceElement, {
+        callback: function (doc) {
+            // Restaurar el ancho original del elemento
+            invoiceElement.style.width = originalWidth;
+            doc.save('formatoLegalización.pdf');
+            notif({
+                type: 'positive',
+                message: 'Formato en PDF descargado',
+                timeout: 1300
+            })
+        },
+        x: 20,
+        y: 20,
+        html2canvas: {
+            scale: 0.56,
+        },
+        margin: [20, 20, 20, 20],
+        autoPaging: 'text',
+        width: 500 // Ajusta el ancho del contenido si es necesario
+    });
 }
 
 onBeforeMount(async function () {
@@ -603,7 +622,7 @@ async function getSchedule() {
         legalization: true
     })
 
-    
+
     return data
 }
 
@@ -833,3 +852,10 @@ const collections = ref([{ name: '', items: [], keys: [] }])
 
 const conclusions = ref([{ data: '' }])
 </script>
+
+<style scoped>
+#invoice {
+    font-family: Arial, sans-serif;
+    word-spacing: 1px;
+}
+</style>

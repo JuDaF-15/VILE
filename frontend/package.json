@@ -12,6 +12,7 @@
     "@quasar/extras": "^1.16.11",
     "axios": "^1.7.2",
     "html2pdf.js": "^0.9.0",
+    "jspdf": "^2.5.1",
     "jwt-decode": "^4.0.0",
     "pinia": "^2.1.7",
     "quasar": "^2.16.4",

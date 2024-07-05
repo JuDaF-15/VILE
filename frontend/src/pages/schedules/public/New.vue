@@ -151,7 +151,7 @@
             </div>
 
             <div v-show="showPreview" class="justify-end start q-mb-md" style="font-size: 12px;">
-                <q-btn @click="imprimirPagina" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
+                <q-btn @click="descargarFormatoPDF" label="Descargar como PDF" icon="download" class="bg-blue text-white" />
             </div>
 
             <div v-show="showPreview" class="col-8 justify-end  flex q-mb-md">
@@ -159,7 +159,7 @@
                     label="Continuar Creación" class="bg-green text-white" />
             </div>
 
-            <div id="descargar">
+            <div id="invoice" ref="invoice" style="width: 65%;">
                 <Preview v-if="showPreview" :row="row" />
             </div>
 
@@ -790,9 +790,10 @@
                             await cleanDialog()
                             yaFirmo = false
                             showDialog = false
-                        }" class="bg-red text-white" label="Cerrar" />
+                        }" class="bg-red text-white" label="Cerrar" icon="fa-solid fa-xmark" />
                         <q-btn @click="id !== null ? updateSchedule() : createSchedule()" :loading="loading"
-                            :disable="yaFirmo === false" class="bg-primary text-white" label="Guardar" />
+                            :disable="yaFirmo === false" class="bg-primary text-white" icon="fa-solid fa-floppy-disk"
+                            label="Guardar" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -811,6 +812,8 @@ import { useUserStore } from '../../../stores/user.js'
 
 import { showNotify } from '../../../components/notify.js'
 
+import { jsPDF } from "jspdf";
+
 import Preview from './Preview.vue'
 
 const scheduleStore = useScheduleStore()
@@ -825,34 +828,49 @@ const fechaActual = new Date()
 
 const isoDate = fechaActual.toISOString().split('T')[0];
 
-console.log(fechaActual);
-
 let yaFirmo = ref(false)
 
-function imprimirPagina() {
-    const printableContent = document.getElementById('descargar').innerHTML;
+const invoice = ref(null)
 
-    // Crear un nuevo elemento div para contener el contenido imprimible
-    const printableDiv = document.createElement('div');
-    printableDiv.innerHTML = printableContent;
+function descargarFormatoPDF() {
+    const notif = $q.notify({
+        type: 'ongoing',
+        message: 'Generando PDF...'
+    })
 
-    // Guardar referencia al body original
-    const originalBody = document.body;
+    const doc = new jsPDF('p', 'pt', 'a4');
 
-    // Crear un nuevo body para la impresión
-    const newBody = document.createElement('body');
-    newBody.innerHTML = printableContent;
+    // Obtener el HTML del div con la referencia
+    const invoiceElement = invoice.value
 
-    // Reemplazar el body actual con el nuevo body para la impresión
-    document.body = newBody;
+    // Guardar el ancho original del elemento
+    const originalWidth = invoiceElement.style.width;
 
-    // Ejecutar el comando de impresión
-    window.print();
+    // Establecer un ancho fijo para el contenido
+    invoiceElement.style.width = '915px'; // Ajusta este valor según tus necesidades
 
-    // Restaurar el body original después de la impresión
-    document.body = originalBody;
+    // Convertir el HTML a PDF usando jsPDF
+    doc.html(invoiceElement, {
+        callback: function (doc) {
+            // Restaurar el ancho original del elemento
+            invoiceElement.style.width = originalWidth;
+            doc.save('formatoFuncionario.pdf');
+            notif({
+                type: 'positive',
+                message: 'Formato en PDF descargado',
+                timeout: 1300
+            })
+        },
+        x: 20,
+        y: 20,
+        html2canvas: {
+            scale: 0.56,
+        },
+        margin: [20, 20, 20, 20],
+        autoPaging: 'text',
+        width: 500 // Ajusta el ancho del contenido si es necesario
+    });
 }
-
 
 onBeforeMount(async function () {
     cargando.value = true
@@ -1414,3 +1432,11 @@ const getActivities = computed(function () {
     return activities.value
 })
 </script>
+
+<style scoped>
+#invoice {
+    font-family: Arial, sans-serif;
+    word-spacing: 1px;
+    /* Ajusta el espaciado entre palabras */
+}
+</style>

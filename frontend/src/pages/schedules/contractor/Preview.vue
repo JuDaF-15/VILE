@@ -74,7 +74,7 @@
                     </div>
 
                     <div class="col-2 items-center justify-center flex">
-                        <p v-text="identification.number || '0000000000'" class="q-my-none" />
+                        <p v-text="identification || '0000000000'" class="q-my-none" />
                     </div>
                 </div>
 

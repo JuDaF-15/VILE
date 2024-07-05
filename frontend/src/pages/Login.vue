@@ -133,6 +133,8 @@ const identification = ref('')
 
 const password = ref('')
 
+let mail = ref('')
+
 const showPassword = ref(false)
 
 let loading = ref(false);
@@ -166,12 +168,11 @@ async function goHome() {
             $q.localStorage.set('token', data.token)
             $q.localStorage.set('user', data.user)
             router.push('/layout')
+            showNotify('Inicio de sesión exitoso', 'positive', 'check')
         }
     }
     loading.value = false
 }
-
-let mail = ref('')
 
 function validarHayCorreo() {
     if (mail.value.trim() === "") {

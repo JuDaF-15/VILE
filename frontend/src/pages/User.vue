@@ -143,13 +143,17 @@
 
                             <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
                                 class="col-12 q-pa-sm">
-                                <q-select v-model="supervisor" :options="supervisorOptions" filled stack-label
-                                    label="Supervisor" />
+                                <q-select v-model="supervisor" label="Supervisor" filled stack-label :options="supervisorOptions.map((sup) => ({
+                                    label: sup.label,
+                                    value: sup.id
+                                }))" emit-value map-options />
                             </div>
 
                             <div v-if="role !== null && role.index !== 2 && role.index !== 1" class="col-12 q-pa-sm">
-                                <q-select v-model="paymaster" :options="paymasterOptions" filled stack-label
-                                    label="Ordenador" />
+                                <q-select v-model="paymaster" label="Ordenador" filled stack-label :options="paymasterOptions.map((ord) => ({
+                                    label: ord.label,
+                                    value: ord.id
+                                }))" emit-value map-options />
                             </div>
                         </div>
                     </q-card-section>
@@ -157,9 +161,9 @@
                     <q-separator />
 
                     <q-card-actions class="justify-around flex">
-                        <q-btn @click="showDialog = false" color="negative" label="Cerrar" />
+                        <q-btn @click="showDialog = false" color="negative" label="Cerrar" icon="fa-solid fa-xmark" />
                         <q-btn color="primary" :loading="loading" @click="bd === 0 ? editUser() : createUser()"
-                            label="Guardar" />
+                            label="Guardar" icon="fa-solid fa-floppy-disk" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -241,10 +245,9 @@ async function getUser(query = {}) {
                 user.push({ label: data[index].name, id: data[index]._id });
             }
         }
-
+        console.log(user);
         return user
     }
-
     return data
 }
 
@@ -303,7 +306,7 @@ async function createUser() {
             password: password.value,
             position: position.value,
             branch: branch.value,
-            paymaster: paymaster.value !== null ? paymaster.value.id : null,
+            paymaster: paymaster.value,
             staffType: staffType.value
         }
 
@@ -316,7 +319,7 @@ async function createUser() {
                 body.object = object.value
                 body.institute = institute.value !== null ? institute.value.data : null,
                     body.regional = regional.value !== null ? regional.value.data : null,
-                    body.supervisor = supervisor.value !== null ? supervisor.value.id : null
+                    body.supervisor = supervisor.value
             }
 
             const { data, status } = await userStore.postUser(body)
@@ -327,6 +330,12 @@ async function createUser() {
                 showNotify(data.msg, 'positive', 'check')
 
                 rows.value = await getUser()
+
+                paymasterOptions.value = await getUser({ paymaster: true })
+
+                regionalOptions.value = await getRegional()
+
+                supervisorOptions.value = await getUser({ supervisor: true })
 
                 showDialog.value = false
             }
@@ -410,15 +419,15 @@ function abrirEditar(data) {
     name.value = data.name
     mail.value = data.mail
     identification.value = data.identification
-    role.value = optionsRole.value[data.role.index],
-        position.value = data.position
+    role.value = optionsRole.value[data.role.index]
+    position.value = data.position
 
     if (data.role.index === 1) {
         editOptionRole.value = [
             { label: 'Administrador', data: 'administrator', index: 1 }
         ]
     } else if (data.role.index === 0) {
-        paymaster.value = data.paymaster.name
+        paymaster.value = data.paymaster._id
         branch.value = data.branch
         editOptionRole.value = [
             { label: 'Supervisor', data: 'supervisor', index: 0 },
@@ -432,7 +441,7 @@ function abrirEditar(data) {
         staffType.value = staffOptions.value[data.staffType.index],
             position.value = data.position
         branch.value = data.branch
-        paymaster.value = data.paymaster.name
+        paymaster.value = data.paymaster._id
         editOptionRole.value = [
             { label: 'Ordenador', data: 'paymaster', index: 2 },
             { label: 'Usuario', data: 'user', index: 3 }
@@ -445,8 +454,8 @@ function abrirEditar(data) {
         contractDate.value.start = data.contract.date.start
         contractDate.value.end = data.contract.date.end
         object.value = data.object
-        paymaster.value = data.paymaster.name
-        supervisor.value = data.supervisor.name
+        paymaster.value = data.paymaster._id
+        supervisor.value = data.supervisor._id
         editOptionRole.value = [
             { label: 'Supervisor', data: 'supervisor', index: 0 },
             { label: 'Usuario', data: 'user', index: 3 }
@@ -498,7 +507,7 @@ async function editUser() {
             identification: identification.value,
             position: position.value,
             branch: branch.value,
-            paymaster: paymaster.value !== null ? paymaster.value.id : null,
+            paymaster: paymaster.value,
             staffType: staffType.value
         }
 
@@ -511,7 +520,7 @@ async function editUser() {
                 body.object = object.value
                 body.institute = institute.value !== null ? institute.value.data : null,
                     body.regional = regional.value !== null ? regional.value.data : null,
-                    body.supervisor = supervisor.value !== null ? supervisor.value.id : null
+                    body.supervisor = supervisor.value
             }
         }
 
@@ -523,6 +532,14 @@ async function editUser() {
             showNotify(data.msg, 'positive', 'check')
 
             rows.value = await getUser()
+
+            paymasterOptions.value = await getUser({ paymaster: true })
+
+            regionalOptions.value = await getRegional()
+
+            supervisorOptions.value = await getUser({ supervisor: true })
+
+            //await traerTodo()
 
             showDialog.value = false
         }

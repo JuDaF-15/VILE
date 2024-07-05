@@ -65,6 +65,8 @@ import { useQuasar } from 'quasar'
 
 import { useUserStore } from '../stores/user.js'
 
+import { showNotify } from '../components/notify.js'
+
 const router = useRouter()
 
 const route = useRoute()
@@ -161,8 +163,8 @@ async function goRoute(item) {
 function goLogin() {
     $q.localStorage.remove('token')
     $q.localStorage.remove('user')
-
     router.replace({ path: '/' })
+    showNotify('Se cerró la sesión', 'positive', 'check')
 }
 </script>
 
