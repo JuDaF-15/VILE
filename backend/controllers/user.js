@@ -184,73 +184,6 @@ const httpUser = {
         }
     },
 
-    /*  putUser: async (req, res) => {
-         const userId = req.params.id
-         const data = {
-             name: req.body.name,
-             mail: req.body.mail,
-             identification: req.body.identification,
-             role: req.body.role,
-             position: req.body.position,
-             branch: req.body.branch,
-             paymaster: req.body.paymaster,
-             staffType: req.body.staffType
-         }
- 
-         const buscar = await User.findById(userId)
-         if (buscar.role.data == 'user' && buscar.staffType.index == 0) {
-             data.contract = req.body.contract
-             data.object = req.body.object
-             data.supervisor = req.body.supervisor
-             data.regional = req.body.regional
-             data.institute = req.body.institute
-         }
- 
-         try {
-             const updatedUser = await User.findOneAndUpdate(
-                 { _id: userId },
-                 {
-                     $set: data
-                 },
-                 { new: true }
-             );
- 
-             res.status(200).json({ msg: 'Usuario actualizado exitosamente', user: updatedUser });
- 
-         } catch (error) {
-             console.log(error);
-             res.status(502).json({ msg: 'ha ocurrido un error al momento de hacer el cambio' });
-             return error
-         }
- 
-     }, */
-
-    /* putUser: async (req, res) => {
-        const { id } = req.params
-
-        try {
-            const buscarCedula = await User.findOne({ identification: req.body.identification });
-            const buscarCorreo = await User.findOne({ mail: req.body.identification });
-            if (buscarCedula) {
-                return res
-                    .status(400)
-                    .json({ msg: "Ya existe un usuario con ese número de cédula", buscarCedula });
-            } else if (buscarCorreo) {
-                return res
-                    .status(400)
-                    .json({ msg: "Ya existe un usuario con ese correo", buscarCorreo });
-            } else {
-                await User.findByIdAndUpdate(id, req.body)
-
-                return res.status(200).json({ msg: 'Usuario modificado' })
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ msg: "Error al editar usuario" });
-        }
-
-    },
- */
     putUser: async (req, res) => {
         const userId = req.params.id;
 
@@ -386,8 +319,8 @@ const httpUser = {
                                     { height: 200, width: 280, crop: 'limit' },
                                     // {quality: 'auto'},
                                     // {fetch_format: 'auto'}
-                                ]
-                                // format: "jpg"
+                                ],
+                                format: "png"
                             }
                         )
 
@@ -463,7 +396,13 @@ const httpUser = {
 
     envioEmail: async (req, res) => {
         try {
+
             const { mail } = req.body;
+
+            if (typeof mail === 'string') {
+                mail.trim();
+            }
+
             const usuario = await User.findOne({ mail: mail })
 
             if (!usuario) {

@@ -4,7 +4,6 @@
             <b>BIENVENIDO</b>
         </div>
 
-
         <div class="card-container q-mt-xl">
             <q-card class="my-card" id="cardP">
                 <router-link to="perfil" class="cardP">
@@ -18,7 +17,7 @@
                 </router-link>
             </q-card>
 
-            <q-card v-if="dataUser === 0 && role !== 'Administrador'" class="my-card" id="cardP">
+            <q-card v-if="dataUser === 0 && role !== 'Administrador' && role !== 'Ordenador'" class="my-card" id="cardP">
                 <router-link to="agenda/contratista/crear" class="cardP">
                     <q-card-section>
                         <div class="text-h6" id="name">Agendas</div>
@@ -97,7 +96,6 @@
                     </q-card-section>
                 </router-link>
             </q-card>
-
 
 
         </div>

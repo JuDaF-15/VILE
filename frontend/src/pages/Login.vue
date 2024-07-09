@@ -22,7 +22,8 @@
                                         style="width: 110px; height: 110px;" />
                                 </div>
                                 <div class="col-12 q-mt-lg">
-                                    <p class="q-my-none text-center" style="font-size: 25px;"><strong>INICIAR SESIÓN</strong>
+                                    <p class="q-my-none text-center" style="font-size: 25px;"><strong>INICIAR
+                                            SESIÓN</strong>
                                     </p>
                                 </div>
                             </div>
@@ -91,11 +92,11 @@
                 <q-separator inset style="height: 5px;margin-top: 5px;" color="primary" /><br>
 
                 <q-card-section class="q-pt-none">
-                    Ingrese la dirección de correo electrónico que 
+                    Ingrese la dirección de correo electrónico que
                     tenga registrada para comenzar:
 
-                    <q-input style="margin-top: 5%;" filled dense v-model="mail" autofocus
-                        @keyup.enter="prompt = false" placeholder="Correo electrónico" />
+                    <q-input style="margin-top: 5%;" filled dense v-model="mail" autofocus @keyup.enter="prompt = false"
+                        placeholder="Correo electrónico" />
                 </q-card-section>
 
                 <q-card-actions align="center">
@@ -175,9 +176,18 @@ async function goHome() {
 }
 
 function validarHayCorreo() {
-    if (mail.value.trim() === "") {
+    const emailValido = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/
+    if (!mail.value.trim()) {
         $q.notify({
             message: 'Debe proporcionar el correo',
+            color: 'negative',
+            icon: 'warning',
+            position: 'top',
+            timeout: 3000
+        })
+    } else if (!emailValido.test(mail.value.trim())) {
+        $q.notify({
+            message: 'Digite un correo válido',
             color: 'negative',
             icon: 'warning',
             position: 'top',
@@ -197,7 +207,7 @@ async function envioCorreo() {
                 message: envio.data.msg,
                 color: "positive",
                 icon: 'check',
-                position: 'top',
+                position: 'bottom',
                 timeout: 4500
             })
             modalVisible.value = false

@@ -302,7 +302,7 @@ function descargarFormatoPDF() {
         message: 'Generando PDF...'
     })
 
-    const doc = new jsPDF('p', 'pt', 'a4');
+    const doc = new jsPDF('p', 'pt', 'letter');
 
     // Obtener el HTML del div con la referencia
     const invoiceElement = invoice.value
@@ -328,7 +328,7 @@ function descargarFormatoPDF() {
         x: 20,
         y: 20,
         html2canvas: {
-            scale: 0.56,
+            scale: 0.58,
         },
         margin: [20, 20, 20, 20],
         autoPaging: 'text',

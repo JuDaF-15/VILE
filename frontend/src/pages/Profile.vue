@@ -15,33 +15,18 @@
                         <div class="col-6">
                             <p class="q-my-none"><strong v-text="'Nombre de Usuario: '" />{{ name }}</p><br>
                             <p class="q-my-none"><strong v-text="'Correo electrónico: '" />{{ mail }}</p><br>
-                            <p class="q-my-none"><strong v-text="'Posición: '" />{{ position }}</p>
+                            <p class="q-my-none"><strong>Posición: </strong>{{ position ? position : 'N/A' }}</p>
 
                         </div>
 
                         <div class="col-6">
                             <p class="q-my-none"><strong v-text="'Tipo de Usuario: '" />{{ role }}</p><br>
-                            <p class="q-my-none"><strong v-text="'Rama: '" />{{ branch }}</p>
+                            <p class="q-my-none"><strong>Rama: </strong>{{ branch ? branch : 'N/A' }}</p>
 
                         </div>
                     </div>
                     <br>
-                    <!-- <div class="row">
-                        <div class="col-12">
-                            <p class="q-my-none"><strong>Cambio de Contraseña</strong></p>
-                        </div>
-
-                        <div class="col-6 q-pa-sm">
-                            <q-input filled stack-label label="Contraseña Actual" />
-                        </div>
-                        <div class="col-6 q-pa-sm">
-                            <q-input filled stack-label label="Contraseña Nueva" />
-                        </div>
-                        <div class="col-12 justify-end flex q-pa-sm">
-                            <q-btn style="background-color: #39a900;color: white;" label="Cambiar" />
-                        </div>
-                    </div> -->
-
+                    
                     <div v-if="showSign" class="row">
                         <div class="col-12 q-mb-sm">
                             <b>Firma</b>
@@ -49,7 +34,7 @@
                         <div class="col-6 q-px-sm">
                             <div class="row">
                                 <div class="col-12 q-mb-sm">
-                                    <q-input v-model="file" filled type="file" />
+                                    <q-input v-model="file" filled type="file" accept="image/*" />
                                 </div>
                                 <div class="col-12 justify-end flex">
                                     <q-btn @click="putSign()" :disable="loading" :loading="loading" icon="upload" class="bg-blue text-white" label="Subir" />

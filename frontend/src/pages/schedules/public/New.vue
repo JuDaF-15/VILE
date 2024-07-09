@@ -838,7 +838,7 @@ function descargarFormatoPDF() {
         message: 'Generando PDF...'
     })
 
-    const doc = new jsPDF('p', 'pt', 'a4');
+    const doc = new jsPDF('p', 'pt', 'letter');
 
     // Obtener el HTML del div con la referencia
     const invoiceElement = invoice.value
@@ -864,7 +864,7 @@ function descargarFormatoPDF() {
         x: 20,
         y: 20,
         html2canvas: {
-            scale: 0.56,
+            scale: 0.58,
         },
         margin: [20, 20, 20, 20],
         autoPaging: 'text',
@@ -1050,8 +1050,6 @@ async function createSchedule() {
     loading.value = true
     //console.log(!route.go.goRoute.value);
 
-    console.log(mainInstitute.value);
-
     if (goRoute.value.length === 0) {
         showNotify('Falta ruta de ida', 'negative')
     } else if (goMeanstransport.value.length === 0) {
@@ -1105,7 +1103,7 @@ async function createSchedule() {
                 return: returnMeanstransport.value
             },
             places: place.value,
-            regional: otherRegional.value !== null ? regional.value.label : null,
+            regional: regional.value !== null ? regional.value.label : null,
             institutes: mainInstitute.value,
             tripStart: dateStart.value,
             tripEnd: dateEnd.value,
@@ -1141,6 +1139,7 @@ async function createSchedule() {
 
 async function updateSchedule() {
     loading.value = true
+
     if (goRoute.value.length === 0) {
         showNotify('Falta ruta de ida', 'negative')
     } else if (goMeanstransport.value.length === 0) {
@@ -1176,8 +1175,7 @@ async function updateSchedule() {
                 return: returnMeanstransport.value
             },
             places: place.value,
-
-            regional: otherRegional.value !== null ? regional.value.label : null,
+            regional: regional.value !== null ? regional.value.label : null,
             tripStart: dateStart.value,
             tripEnd: dateEnd.value,
             tripObjective: object.value,

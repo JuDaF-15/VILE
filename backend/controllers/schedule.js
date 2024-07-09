@@ -31,7 +31,7 @@ const httpSchedule = {
             })
 
             if (existingSchedule) {
-                return res.status(400).json({ msg: 'Ya existe una agenda con exactamente las mismas fechas' });
+                return res.status(400).json({ msg: 'Usted ya tiene una agenda con exactamente las mismas fechas' });
             }
 
             await schedule.save()
@@ -587,7 +587,7 @@ const httpSchedule = {
             });
 
         } else if (req.body.status.data === 'Agenda en Proceso de Legalización') {
-            // Obtener el paymaster que modificó la agenda
+            // Obtener el admin que modificó la agenda
             const admin = await User.findById(req.body.userId)
 
             // NOTIFICAR AL CREADOR
