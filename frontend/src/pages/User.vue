@@ -4,7 +4,7 @@
         <div class="row justify-center">
 
             <!-- tabla -->
-            <div class="col-10">
+            <div class="col-10" style="width: 90%;">
                 <q-table :loading="cargando" class="my-sticky-header-table" :filter="filter" :columns="columns"
                     :rows="rows">
 
@@ -168,6 +168,13 @@
                 </q-card>
             </q-dialog>
         </div>
+        <q-page-sticky position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -188,6 +195,10 @@ const userStore = useUserStore()
 let filter = ref('')
 const scheduleStore = useScheduleStore()
 let bd = ref("");
+
+function recargar() {
+    window.location.reload()
+}
 
 onBeforeMount(
     async () => {
@@ -512,7 +523,7 @@ async function editUser() {
         }
 
         if (role.value !== null) {
-            if (role.value.index == 3 && staffType.value !== null && staffType.value.index == 0) {
+            if (role.value.index === 3 && staffType.value?.data === 'contractor') {
                 body.contract = {
                     number: contractNumber.value,
                     date: contractDate.value

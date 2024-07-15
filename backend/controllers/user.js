@@ -3,38 +3,9 @@ import cloudinary from 'cloudinary'
 import fs from 'fs'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import * as XLSX from "xlsx/xlsx.mjs";
 import sendEmail from "../middlewares/sendEmail.js"
 
 const saltRounds = 10
-
-console.log(XLSX)
-
-XLSX.set_fs(fs)
-
-/* function generateInfoOfExcel(file, req) {
-    console.log(file)
-
-    const excelFile = XLSX.readFile(file.tempFilePath);
-    const sheetName = excelFile.SheetNames;
-
-    const sheet = excelFile.Sheets[sheetName[0]];
-    //hacer que el json tenga un array de objetos, cada uno con la propiedad number, month, letter
-
-    const data = XLSX.utils.sheet_to_json(sheet, {
-        header: [, "name", "document", "ncontract", "datecontract", "object", , , "area", , "email", , , , , , , , , , "supervisor", "sdocument", , "emailsuper", "cargo", , , , , , , , , , "datefinish"],
-        range: 1, //para que empiece a leer desde la fila 2
-        row: false, //para que los datos los tome como columnas
-        blankrows: false, //para no incluir las filas en blanco
-        defval: null, //para que los datos vacíos los tome como null
-        cellDates: true, //para que las fechas las tome como fechas
-        sheetStubs: true, //para que las celdas vacías las tome como null
-    });
-
-    console.log(data)
-
-
-}; */
 
 const httpUser = {
     getUser: async (req, res) => {
@@ -283,7 +254,8 @@ const httpUser = {
                         user.sign.public_id,
                         {
                             resource_type: 'image',
-                            type: 'upload'
+                            type: 'upload',
+                            format: 'png'
                         }
                     )
                 } catch (error) {
@@ -363,7 +335,7 @@ const httpUser = {
         } else {
             await bcrypt.compare(password, user.password, async function (err, result) {
                 if (result == true) {
-                    await jwt.sign({ mail: user.mail, identification: user.identification, id: user._id, role: user.role }, process.env.PRIVATE_KEY, function (err, token) {
+                    await jwt.sign({ mail: user.mail, identification: user.identification, id: user._id, role: user.role, staffType: user.staffType }, process.env.PRIVATE_KEY, function (err, token) {
                         // console.log(token)
                         return res.status(200).json({ token: token })
                     })
@@ -482,10 +454,10 @@ const httpUser = {
                 return res.status(400).json({ msg: 'La nueva contraseña no es valida' })
             }
 
-            const salt = bcrypt.genSaltSync();
+            const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(nuevaContrasena, salt);
             usuario.password = hashedPassword
-            usuario.recuperacion = '';
+            usuario.recuperacion = null;
             await usuario.save();
 
             return res.status(200).json({ msg: 'Contraseña restablecida con éxito', nuevaContrasena })

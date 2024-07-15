@@ -41,9 +41,3 @@ Admin
 123456789
 1234567890
 
-
-----------------------
-
-else if ((role.value.data === 'supervisor' || staffType.value?.data === 'publicWorker' || staffType.value?.data === 'contractor') && !paymaster.value) {
-        showNotify('Seleccione un ordenador del gasto', 'negative')
-    } 

@@ -654,7 +654,7 @@
 
                                         <div v-if="index !== 0" class="col-2 items-center flex">
                                             <q-btn @click="duties.splice(index, 1)" dense label="Eliminar"
-                                                class="bg-red text-white" />
+                                                color="negative" />
                                         </div>
 
                                         <div v-else class="col-2" />
@@ -692,19 +692,19 @@
                                                                 class="col-12">
                                                                 <q-btn v-if="itemIndex !== 0"
                                                                     @click="element.items.splice(itemIndex, 1)" dense
-                                                                    label="Eliminar" class="bg-red text-white" />
+                                                                    label="Eliminar" color="negative" />
                                                             </div>
                                                             <div v-else-if="getActivities.length - 1 !== 0" class="col-12">
                                                                 <q-btn
                                                                     v-if="index == 0 && itemIndex !== 0 || index == getActivities.length - 1 && itemIndex !== element.items.length - 1"
                                                                     @click="element.items.splice(itemIndex, 1)" dense
-                                                                    label="Eliminar" class="bg-red text-white" />
+                                                                    label="Eliminar" color="negative" />
                                                             </div>
                                                             <div v-else class="col-12">
                                                                 <q-btn
                                                                     v-if="itemIndex !== 0 && itemIndex !== element.data.length - 1"
                                                                     @click="element.items.splice(itemIndex, 1)" dense
-                                                                    label="Eliminar" class="bg-red text-white" />
+                                                                    label="Eliminar" color="negative" />
                                                             </div>
                                                         </div>
                                                     </div>
@@ -738,7 +738,7 @@
 
                                         <div v-if="index !== 0" class="col-2 items-center flex">
                                             <q-btn @click="observations.splice(index, 1)" dense label="Eliminar"
-                                                class="bg-red text-white" />
+                                                color="negative" />
                                         </div>
 
                                         <div v-else class="col-2" />
@@ -780,13 +780,36 @@
                     <q-separator />
 
                     <q-card-actions class="justify-around">
-                        <q-btn @click="cleanDialog()" label="Cerrar" v-close-popup icon="fa-solid fa-xmark" class="bg-red text-white" />
-                        <q-btn @click="id == null ? createSchedule() : updateSchedule()" icon="fa-solid fa-floppy-disk" label="Guardar"
-                            class="bg-primary text-white" :disable="yaFirmo === false" :loading="loading" />
+                        <q-btn @click="cleanDialog()" label="Cerrar" v-close-popup icon="fa-solid fa-xmark"
+                            color="negative" />
+                        <q-btn @click="confirmarGuardar()" icon="fa-solid fa-floppy-disk" label="Guardar"
+                            class="bg-primary text-white" :disable="yaFirmo === false" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
+            <q-dialog v-model="confirm" persistent>
+                <q-card>
+                    <q-card-section class="q-gutter-md text-center">
+                        <q-img src="../../../assets/advertencia.png" fit="contain" style="height: 70px; width: 70px;" />
+                        <p style="font-size: 18px;font-weight: bold;">¿Está seguro de que desea crear la agenda?</p>
+                        <p style="font-size: 15px;">No podrá modificarla después</p>
+                    </q-card-section>
+
+                    <q-card-actions class="flex-center" align="right">
+                        <q-btn label="Cancelar" color="negative" icon="fa-solid fa-xmark" @click="confirm = false" />
+                        <q-btn label="Sí, crearla" icon="check" color="primary"
+                            @click="id !== null ? updateSchedule() : createSchedule()" :loading="loading" />
+                    </q-card-actions><br />
+                </q-card>
+            </q-dialog>
         </div>
+        <q-page-sticky v-if="!showPreview" position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -824,6 +847,16 @@ const isoDate = fechaActual.toISOString().split('T')[0];
 
 const invoice = ref(null)
 
+let confirm = ref(false)
+
+function recargar() {
+    window.location.reload()
+}
+
+function confirmarGuardar() {
+    confirm.value = true
+};
+
 function descargarFormatoPDF() {
     const notif = $q.notify({
         type: 'ongoing',
@@ -839,7 +872,7 @@ function descargarFormatoPDF() {
     const originalWidth = invoiceElement.style.width;
 
     // Establecer un ancho fijo para el contenido
-    invoiceElement.style.width = '915px'; 
+    invoiceElement.style.width = '915px';
 
     // Convertir el HTML a PDF usando jsPDF
     doc.html(invoiceElement, {
@@ -1103,6 +1136,7 @@ async function cleanDialog() {
 
     labelDialog.value = 'Crear Agenda'
 }
+
 
 const showDialog = ref(false)
 
@@ -1376,8 +1410,6 @@ const getActivities = computed(() => {
 
 const observations = ref([{ data: '' }])
 
-const file = ref(null)
-
 async function getSign() {
 
     if (currentUser.value.role == 'user') {
@@ -1481,6 +1513,9 @@ async function createSchedule() {
             showNotify('Agenda Creada, pendiente por aprobación del supervisor', 'positive', 'check')
 
             await cleanDialog()
+
+            confirm.value = false
+
         }
     }
 
@@ -1488,6 +1523,7 @@ async function createSchedule() {
 }
 
 async function updateSchedule() {
+    loading.value = true
     if (goRoute.value.length === 0) {
         showNotify('Falta ruta de ida', 'negative')
     } else if (goMeanstransport.value.length === 0) {
@@ -1555,8 +1591,11 @@ async function updateSchedule() {
 
         showNotify('Agenda modificada y enviada correctamente', 'positive', 'check')
 
+        confirm.value = false
+
         await cleanDialog()
     }
+    loading.value = false
 
 }
 </script>
@@ -1565,6 +1604,7 @@ async function updateSchedule() {
 .border-bottom {
     border-bottom: 1px solid black;
 }
+
 .border-right {
     border-right: 1px solid black;
 }

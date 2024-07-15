@@ -430,19 +430,6 @@ const $q = useQuasar()
 
 const userStore = useUserStore()
 
-/* import html2pdf from 'html2pdf.js'
-
-function generatePDF() {
-    let element = document.getElementById('element');
-    let opt = {
-        margin: 1,
-        filename: 'myfile.pdf',
-        //image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 4 },
-        //jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-    html2pdf().from(element).set(opt).toPdf().save();
-} */
 
 const props = defineProps({
     row: Object

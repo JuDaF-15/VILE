@@ -75,7 +75,7 @@
 
         <q-footer style="background-color: rgb(224, 224, 224);">
             <div class="row items-center justify-center" style=" height: 50px;">
-                <p class="q-my-none" style="font-size: 18px; color: black;text-align: center;"><strong>VILE - Sena 2024
+                <p class="q-my-none" style="font-size: 18px; color: black;text-align: center;"><strong>VILE - SENA 2024
                         © Todos
                         los derechos reservados</strong></p>
             </div>
@@ -95,16 +95,13 @@
                     Ingrese la dirección de correo electrónico que
                     tenga registrada para comenzar:
 
-                    <q-input style="margin-top: 5%;" filled dense v-model="mail" autofocus @keyup.enter="prompt = false"
-                        placeholder="Correo electrónico" />
+                    <q-input style="margin-top: 5%;" filled dense v-model="mail" label="Correo electrónico" />
                 </q-card-section>
 
                 <q-card-actions align="center">
-
                     <div class="row">
                         <q-btn label="Enviar Correo" :loading="cargando" color="primary" @click="envioCorreo" />
                     </div>
-
                 </q-card-actions>
                 <br>
             </q-card>

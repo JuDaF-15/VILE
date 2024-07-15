@@ -738,7 +738,7 @@
 
                                                             <div v-else class="col-2 items-center flex">
                                                                 <q-btn @click="element.items.splice(itemIndex, 1)" dense
-                                                                    label="Eliminar" class="bg-red text-white" />
+                                                                    label="Eliminar" color="negative" />
                                                             </div>
                                                         </div>
                                                     </div>
@@ -790,14 +790,36 @@
                             await cleanDialog()
                             yaFirmo = false
                             showDialog = false
-                        }" class="bg-red text-white" label="Cerrar" icon="fa-solid fa-xmark" />
-                        <q-btn @click="id !== null ? updateSchedule() : createSchedule()" :loading="loading"
-                            :disable="yaFirmo === false" class="bg-primary text-white" icon="fa-solid fa-floppy-disk"
-                            label="Guardar" />
+                        }" color="negative" label="Cerrar" icon="fa-solid fa-xmark" />
+                        <q-btn :disable="yaFirmo === false" class="bg-primary text-white" icon="fa-solid fa-floppy-disk"
+                            label="Guardar" @click="confirmarGuardar()" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
+
+            <q-dialog v-model="confirm" persistent>
+                <q-card>
+                    <q-card-section class="q-gutter-md text-center">
+                        <q-img src="../../../assets/advertencia.png" fit="contain" style="height: 70px; width: 70px;" />
+                        <p style="font-size: 18px;font-weight: bold;">¿Está seguro de que desea crear la agenda?</p>
+                        <p style="font-size: 15px;">No podrá modificarla después</p>
+                    </q-card-section>
+
+                    <q-card-actions class="flex-center" align="right">
+                        <q-btn label="Cancelar" color="negative" icon="fa-solid fa-xmark" @click="confirm = false" />
+                        <q-btn label="Sí, crearla" icon="check" color="primary"
+                            @click="id !== null ? updateSchedule() : createSchedule()" :loading="loading" />
+                    </q-card-actions><br />
+                </q-card>
+            </q-dialog>
         </div>
+        <q-page-sticky v-if="!showPreview" position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -831,6 +853,16 @@ const isoDate = fechaActual.toISOString().split('T')[0];
 let yaFirmo = ref(false)
 
 const invoice = ref(null)
+
+let confirm = ref(false)
+
+function recargar() {
+    window.location.reload()
+}
+
+function confirmarGuardar() {
+    confirm.value = true
+};
 
 function descargarFormatoPDF() {
     const notif = $q.notify({
@@ -1048,8 +1080,6 @@ async function cleanDialog() {
 
 async function createSchedule() {
     loading.value = true
-    //console.log(!route.go.goRoute.value);
-
     if (goRoute.value.length === 0) {
         showNotify('Falta ruta de ida', 'negative')
     } else if (goMeanstransport.value.length === 0) {
@@ -1125,21 +1155,18 @@ async function createSchedule() {
             await cleanDialog()
 
             showDialog.value = false
-
+            confirm.value = false
             yaFirmo.value = false
         } else {
             showNotify('Agenda Creada', 'positive', 'check')
         }
 
-
     }
     loading.value = false
-
 }
 
 async function updateSchedule() {
     loading.value = true
-
     if (goRoute.value.length === 0) {
         showNotify('Falta ruta de ida', 'negative')
     } else if (goMeanstransport.value.length === 0) {
@@ -1176,6 +1203,7 @@ async function updateSchedule() {
             },
             places: place.value,
             regional: regional.value !== null ? regional.value.label : null,
+            institutes: mainInstitute.value,
             tripStart: dateStart.value,
             tripEnd: dateEnd.value,
             tripObjective: object.value,
@@ -1193,6 +1221,9 @@ async function updateSchedule() {
         showNotify('Agenda modificada y enviada correctamente', 'positive', 'check')
 
         showDialog.value = false
+
+        confirm.value = false
+
     }
     loading.value = false
 }
@@ -1277,7 +1308,7 @@ const id = ref(null)
 
 const status = ref(null)
 
-const loading = ref(false)
+let loading = ref(false)
 
 const showDialog = ref(false)
 

@@ -236,10 +236,11 @@
             <div v-if="!showReject" class="col-6 q-mt-md">
                 <div v-if="user.role.data == 'supervisor' || user.role.data == 'paymaster'" class="row">
                     <div class="col-12 justify-around flex">
-                        <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-x"
-                            class="bg-red text-white" />
+                        <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-xmark"
+                            color="negative" />
 
-                        <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-green text-white" />
+                        <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-green text-white"
+                            :loading="loading" />
 
                     </div>
                 </div>
@@ -261,14 +262,21 @@
                         <q-input filled autogrow stack-label v-model="justification" label="Justificación" />
                     </div>
                     <div class="col-12 justify-around flex q-mt-sm">
-                        <q-btn @click="justification = null; showReject = false" label="Cancelar"
-                            class="bg-red text-white" />
-                        <q-btn @click="updateSchedule(row._id)" label="Enviar" class="bg-green text-white" />
+                        <q-btn @click="justification = null; showReject = false" label="Cancelar" color="negative" />
+                        <q-btn @click="updateSchedule(row._id)" label="Enviar" :loading="loading"
+                            class="bg-green text-white" />
                     </div>
                 </div>
             </div>
 
         </div>
+        <q-page-sticky v-if="!showPreview" position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -294,7 +302,13 @@ const $q = useQuasar()
 
 let cargando = ref(false)
 
+let loading = ref(false)
+
 const invoice = ref(null)
+
+function recargar() {
+    window.location.reload()
+}
 
 function descargarFormatoPDF() {
     const notif = $q.notify({
@@ -339,7 +353,7 @@ function descargarFormatoPDF() {
 onBeforeMount(async () => {
     user.value = $q.localStorage.getItem('user')
 
-    console.log(user.value)
+    //console.log(user.value)
 
     cargando.value = true
 
@@ -361,11 +375,11 @@ onBeforeMount(async () => {
 
     cargando.value = false
 
-
-    console.log(rows.value)
+    //console.log(rows.value)
 })
 
 async function getSign() {
+    loading.value = true
     const { data } = await userStore.getUserParams(user.value.id)
 
     if (data.sign && data.sign.url) {
@@ -415,6 +429,7 @@ async function getSign() {
     } else {
         showNotify('Firma no encontrada', 'negative')
     }
+    loading.value = false
 }
 
 async function getSchedule(query = {}) {
@@ -478,44 +493,49 @@ const columns = ref([
 ])
 
 async function updateSchedule(id) {
+    loading.value = true
     if (showReject.value) {
-        await scheduleStore.putSchedule({
-            userId: user.value.id,
-            status: {
-                index: 0,
-                data: 'Agenda rechazada',
-                justification: justification.value ? justification.value : '-',
-                number: 1
-            },
-            signature: {
-                contractor: null,
-                supervisor: null,
-                paymaster: null,
-                publicWorker: null
+        if (justification.value === null || !justification.value.trim()) {
+            showNotify('Proporcione una justificación', 'negative')
+        } else {
+            await scheduleStore.putSchedule({
+                userId: user.value.id,
+                status: {
+                    index: 0,
+                    data: 'Agenda rechazada',
+                    justification: justification.value ? justification.value : '-',
+                    number: 1
+                },
+                signature: {
+                    contractor: null,
+                    supervisor: null,
+                    paymaster: null,
+                    publicWorker: null
+                }
+            }, id)
+
+            if (user.value.role.data == 'supervisor') {
+                rows.value = await getSchedule({
+                    supervisor: user.value.id
+                })
             }
-        }, id)
 
-        if (user.value.role.data == 'supervisor') {
-            rows.value = await getSchedule({
-                supervisor: user.value.id
-            })
+            if (user.value.role.data == 'paymaster') {
+                rows.value = await getSchedule({
+                    paymaster: user.value.id
+                })
+            }
+
+            console.log(user.value._id),
+
+                showReject.value = false
+
+            row.value = null
+
+            showNotify('Agenda Rechazada', 'info', 'info')
+
+            showPreview.value = false
         }
-
-        if (user.value.role.data == 'paymaster') {
-            rows.value = await getSchedule({
-                paymaster: user.value.id
-            })
-        }
-
-        console.log(user.value._id),
-
-            showReject.value = false
-
-        row.value = null
-
-        showNotify('Agenda Rechazada', 'info', 'info')
-
-        showPreview.value = false
     } else {
         if (user.value.role.data == 'administrator' && !tripOrder.value) {
             showNotify('Digite el número de orden de viaje', 'negative')
@@ -549,7 +569,7 @@ async function updateSchedule(id) {
             showReject.value = false
         }
     }
-
+    loading.value = false
 }
 
 const showReject = ref(false)

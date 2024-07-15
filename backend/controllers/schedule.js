@@ -9,14 +9,7 @@ import sendEmail from "../middlewares/sendEmail.js"
 import fs from 'fs'
 
 const httpSchedule = {
-    /* postSchedule: async (req, res) => {
-        const schedule = new Schedule(req.body)
-
-        await schedule.save()
-
-        return res.status(200).json({ msg: 'Agenda creada' })
-    }, */
-
+   
     postSchedule: async (req, res) => {
 
         const schedule = new Schedule(req.body)
@@ -233,7 +226,6 @@ const httpSchedule = {
         return res.status(200).json(data)
     },
 
-
     getScheduleParams: async (req, res) => {
         const { id } = req.params
 
@@ -407,7 +399,7 @@ const httpSchedule = {
                     if (error) {
                         console.log(error);
                     } else {
-                        console.log('Correo enviado');
+                        console.log('Correo de rechazo de ordenador enviado');
                     }
                 });
             }
@@ -635,7 +627,6 @@ const httpSchedule = {
 
         return res.status(200).json({ msg: 'Agenda modificada' })
     },
-
 
     postLegalizacion: async (req, res) => {
         const { id } = req.params

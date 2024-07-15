@@ -123,7 +123,7 @@ onBeforeMount(async () => {
             { label: 'Solicitudes', link: '/layout/agenda/solicitudes', icon: 'fa-solid fa-person-circle-question' },
             { label: 'Legalizaciones', link: '/layout/agenda/legalizacion', icon: 'fa-solid fa-signature' }
         ]
-    } else if (role.data == 'paymaster') {
+    } else if (role.data === 'paymaster') {
         items.value = [
             { label: 'Home', link: '/layout/home', icon: 'house' },
             { label: 'Perfil de Usuario', link: '/layout/perfil', icon: 'person' },

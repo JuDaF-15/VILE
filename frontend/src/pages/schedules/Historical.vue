@@ -21,8 +21,8 @@
                     <template v-slot:body-cell-place="props">
                         <td :props="props">
                             <p v-if="props.row.place !== null" class="q-my-none text-center" v-text="props.row.place" />
-                            <p v-if="props.row.places && props.row.places.length !== 0"
-                                v-text="props.row.places[0].data" class="q-my-none text-center" />
+                            <p v-if="props.row.places && props.row.places.length !== 0" v-text="props.row.places[0].data"
+                                class="q-my-none text-center" />
                             <div v-else class="row justify-center">
                                 <div class="col-12">
                                     <p class="q-my-none text-center" v-text="props.row.regional" />
@@ -61,6 +61,13 @@
                 </q-table>
             </div>
         </div>
+        <q-page-sticky position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -79,6 +86,10 @@ const scheduleStore = useScheduleStore()
 const userStore = useUserStore()
 
 let cargando = ref(false)
+
+function recargar() {
+    window.location.reload()
+}
 
 onBeforeMount(async function () {
 

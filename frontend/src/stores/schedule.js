@@ -36,7 +36,7 @@ export const useScheduleStore = defineStore('Schedules', {
                 }
             })
 
-            return { data }
+            return { data, status }
         },
 
         async postSchedule(data) {

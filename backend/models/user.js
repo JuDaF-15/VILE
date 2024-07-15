@@ -36,7 +36,7 @@ const schemaUser = new mongoose.Schema({
     },
     paymaster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: { type: Number, default: 1 },
-    recuperacion: { type: String, default: '' },
+    recuperacion: { type: String, default: null },
 }) 
 
 export default mongoose.model('User', schemaUser)

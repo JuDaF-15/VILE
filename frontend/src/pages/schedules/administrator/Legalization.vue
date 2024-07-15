@@ -228,7 +228,7 @@
                         showPreview = false
                         showOther = false
                     }
-                }" label="Atrás" icon="fa-solid fa-arrow-left" class="bg-red text-white" />
+                }" label="Atrás" icon="fa-solid fa-arrow-left" color="negative" />
             </div>
 
             <div class="col-12" />
@@ -308,7 +308,7 @@
 
                                         <div v-if="index !== 0" class="col-2 items-center flex">
                                             <q-btn @click="results.splice(index, 1)" dense label="Eliminar"
-                                                class="bg-red text-white" />
+                                                color="negative" />
                                         </div>
 
                                         <div v-else class="col-2" />
@@ -342,7 +342,7 @@
 
                                     <div v-if="index !== 0" class="col-2 items-center flex">
                                         <q-btn @click="collections.splice(index, 1)" dense label="Eliminar"
-                                            class="bg-red text-white" />
+                                            color="negative" />
                                     </div>
 
                                     <div v-else class="col-2"></div>
@@ -387,7 +387,7 @@
                                         </div>
 
                                         <div class="col-12 justify-end flex q-pr-md q-mb-md">
-                                            <q-btn v-if="index !== 0" @click="collections.splice(index, 1)" dense label="Eliminar" class="bg-red text-white" />
+                                            <q-btn v-if="index !== 0" @click="collections.splice(index, 1)" dense label="Eliminar" color="negative" />
                                         </div>
                                     </div>
                                 </template>
@@ -412,7 +412,7 @@
 
                                     <div v-if="index !== 0" class="col-2 items-center flex">
                                         <q-btn @click="conclusions.splice(index, 1)" dense label="Eliminar"
-                                            class="bg-red text-white" />
+                                            color="negative" />
                                     </div>
                                 </div>
                             </template>
@@ -452,13 +452,20 @@
                     <q-separator />
 
                     <q-card-actions class="justify-around">
-                        <q-btn @click="cleanDialog()" :disable="loading" label="Cerrar" class="bg-red text-white" />
+                        <q-btn @click="cleanDialog()" :disable="loading" label="Cerrar" color="negative" />
                         <q-btn @click="postLegalization()" :loading="loading" :disable="loading" label="Guardar"
                             class="bg-primary text-white" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
         </div>
+        <q-page-sticky position="bottom-right" :offset="[20, 20]">
+            <q-btn @click="recargar()" color="primary" fab icon="fa-solid fa-rotate-right">
+                <q-tooltip anchor="top middle" self="bottom middle" :offset="[10, 10]">
+                    Recargar página
+                </q-tooltip>
+            </q-btn>
+        </q-page-sticky>
     </q-page>
 </template>
 
@@ -478,6 +485,10 @@ import OtherPreview from '../public/Preview.vue'
 let cargando = ref(false)
 
 const invoice = ref(null)
+
+function recargar() {
+    window.location.reload()
+}
 
 function descargarFormatoPDF() {
     const notif = $q.notify({
