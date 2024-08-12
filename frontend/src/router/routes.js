@@ -71,7 +71,7 @@ const routes = [
                 children: [
                     {
                         path: 'funcionario', children: [
-                            { path: 'crear', component: NewPublic, beforeEnter: requireRole(['publicWorker']) },
+                            { path: 'crear', component: NewPublic, beforeEnter: requireRole(['publicWorker','supervisor']) },
                             { path: 'legalizacion', component: Legalization }
                         ]
                     },

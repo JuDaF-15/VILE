@@ -4,7 +4,7 @@
         <div class="row justify-center">
 
             <!-- tabla -->
-            <div class="col-10" style="width: 90%;">
+            <div class="col-8 q-mt-md" style="width: 90%;">
                 <q-table :loading="cargando" class="my-sticky-header-table" :filter="filter" :columns="columns"
                     :rows="rows">
 
@@ -91,7 +91,13 @@
                             </div>
 
                             <div v-if="bd === 1" class="col-12 q-pa-sm">
-                                <q-input filled stack-label v-model="password" label="Contraseña" />
+                                <q-input filled stack-label v-model="password" label="Contraseña"
+                                    :type="showPassword ? 'text' : 'password'">
+                                    <template v-slot:append>
+                                        <q-icon :name="showPassword ? 'visibility' : 'visibility_off'"
+                                            class="cursor-pointer" @click="showPassword = !showPassword" />
+                                    </template>
+                                </q-input>
                             </div>
 
                             <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
@@ -141,7 +147,7 @@
                                 <q-input v-model="object" autogrow filled stack-label label="Objeto" />
                             </div>
 
-                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                            <div v-if="staffType !== null && staffType.index == 0 && role.index == 3 && supervisorOptions.length != 0"
                                 class="col-12 q-pa-sm">
                                 <q-select v-model="supervisor" label="Supervisor" filled stack-label :options="supervisorOptions.map((sup) => ({
                                     label: sup.label,
@@ -149,11 +155,22 @@
                                 }))" emit-value map-options />
                             </div>
 
-                            <div v-if="role !== null && role.index !== 2 && role.index !== 1" class="col-12 q-pa-sm">
+                            <div v-else-if="staffType !== null && staffType.index == 0 && role.index == 3"
+                                class="col-12 q-pa-sm">
+                                <q-select v-model="noSup" disable label="Supervisor" filled stack-label />
+                            </div>
+
+                            <div v-if="role !== null && role.index !== 2 && role.index !== 1 && paymasterOptions.length != 0"
+                                class="col-12 q-pa-sm">
                                 <q-select v-model="paymaster" label="Ordenador" filled stack-label :options="paymasterOptions.map((ord) => ({
                                     label: ord.label,
                                     value: ord.id
-                                }))" emit-value map-options />
+                                }))
+                                    " emit-value map-options />
+                            </div>
+
+                            <div v-else-if="role !== null && role.index !== 2 && role.index !== 1" class="col-12 q-pa-sm">
+                                <q-select v-model="noOrd" label="Ordenador" disable filled stack-label />
                             </div>
                         </div>
                     </q-card-section>
@@ -195,6 +212,9 @@ const userStore = useUserStore()
 let filter = ref('')
 const scheduleStore = useScheduleStore()
 let bd = ref("");
+const showPassword = ref(false)
+const noSup = ref('No hay supervisores disponibles')
+const noOrd = ref('No hay ordenadores disponibles')
 
 function recargar() {
     window.location.reload()
@@ -205,6 +225,8 @@ onBeforeMount(
         cargando.value = true
 
         rows.value = await getUser()
+
+        rows.value.reverse()
 
         paymasterOptions.value = await getUser({ paymaster: true })
 
@@ -246,20 +268,72 @@ async function getRegional() {
 }
 
 async function getUser(query = {}) {
-    const { data } = await userStore.getUser(query)
+    const { data } = await userStore.getUser(query);
 
+    // Verificar si el query especifica un rol
     if (query.paymaster || query.supervisor) {
-        const user = []
+        const user = [];
 
         for (let index = 0; index < data.length; index++) {
+            // Filtrar según el rol especificado en el query
             if (data[index].status === 1) {
-                user.push({ label: data[index].name, id: data[index]._id });
+                if (query.paymaster && data[index].role.data === 'paymaster') {
+                    user.push({ label: data[index].name, id: data[index]._id });
+                }
+                if (query.supervisor && data[index].role.data === 'supervisor') {
+                    user.push({ label: data[index].name, id: data[index]._id });
+                }
             }
         }
-        console.log(user);
-        return user
+        return user;
     }
-    return data
+    return data;
+}
+
+async function cleanDialog() {
+    id.value = ''
+    name.value = ''
+    mail.value = ''
+    identification.value = ''
+    password.value = ''
+    role.value = ''
+    editOptionRole.value = []
+
+    branch.value = ''
+    contractNumber.value = ''
+    contractDate.value = {
+        start: '',
+        end: ''
+    }
+
+    staffType.value = ''
+    supervisor.value = ''
+
+    institute.value = ''
+    regional.value = ''
+
+    object.value = ''
+
+    position.value = ''
+    paymaster.value = ''
+
+    rows.value = await getUser()
+
+    rows.value.reverse()
+
+    supervisorOptions.value.splice(0)
+
+    supervisorOptions.value = await getUser({ supervisor: true })
+
+    paymasterOptions.value.splice(0)
+
+    paymasterOptions.value = await getUser({ paymaster: true })
+}
+
+
+function nuevo() {
+    bd.value = 1;
+    cleanDialog()
 }
 
 async function createUser() {
@@ -317,11 +391,14 @@ async function createUser() {
             password: password.value,
             position: position.value,
             branch: branch.value,
-            paymaster: paymaster.value,
             staffType: staffType.value
         }
 
         if (role.value !== null) {
+            if (role.value.index !== 2 && role.value.index !== 1) {
+                body.paymaster = paymaster.value
+            }
+
             if (role.value.index == 3 && staffType.value !== null && staffType.value.index == 0) {
                 body.contract = {
                     number: contractNumber.value,
@@ -331,6 +408,7 @@ async function createUser() {
                 body.institute = institute.value !== null ? institute.value.data : null,
                     body.regional = regional.value !== null ? regional.value.data : null,
                     body.supervisor = supervisor.value
+                body.paymaster = paymaster.value
             }
 
             const { data, status } = await userStore.postUser(body)
@@ -341,6 +419,8 @@ async function createUser() {
                 showNotify(data.msg, 'positive', 'check')
 
                 rows.value = await getUser()
+
+                rows.value.reverse()
 
                 paymasterOptions.value = await getUser({ paymaster: true })
 
@@ -356,50 +436,6 @@ async function createUser() {
     loading.value = false
 }
 
-async function cleanDialog() {
-    id.value = ''
-    name.value = ''
-    mail.value = ''
-    identification.value = ''
-    password.value = ''
-    role.value = ''
-    editOptionRole.value = []
-
-    branch.value = ''
-    contractNumber.value = ''
-    contractDate.value = {
-        start: '',
-        end: ''
-    }
-
-    staffType.value = ''
-    supervisor.value = ''
-
-    institute.value = ''
-    regional.value = ''
-
-    object.value = ''
-
-    position.value = ''
-    paymaster.value = ''
-
-    rows.value = await getUser()
-
-    supervisorOptions.value.splice(0)
-
-    supervisorOptions.value = await getUser({ supervisor: true })
-
-    paymasterOptions.value.splice(0)
-
-    paymasterOptions.value = await getUser({ paymaster: true })
-}
-
-
-function nuevo() {
-    bd.value = 1;
-    cleanDialog();
-}
-
 const $q = useQuasar()
 
 async function editarEstado(x) {
@@ -413,7 +449,7 @@ async function editarEstado(x) {
         $q.notify({
             message: "Estado editado exitosamente",
             color: "positive",
-            icon: "check",
+            type: 'positive',
             position: "bottom",
             timeout: 3000,
         });
@@ -423,9 +459,9 @@ async function editarEstado(x) {
 }
 
 function abrirEditar(data) {
-    bd.value = 0
-    console.log(data)
+    //console.log(data)
 
+    bd.value = 0
     id.value = data._id
     name.value = data.name
     mail.value = data.mail
@@ -518,11 +554,14 @@ async function editUser() {
             identification: identification.value,
             position: position.value,
             branch: branch.value,
-            paymaster: paymaster.value,
             staffType: staffType.value
         }
 
         if (role.value !== null) {
+            if (role.value.index !== 2 && role.value.index !== 1) {
+                body.paymaster = paymaster.value
+            }
+
             if (role.value.index === 3 && staffType.value?.data === 'contractor') {
                 body.contract = {
                     number: contractNumber.value,
@@ -532,6 +571,7 @@ async function editUser() {
                 body.institute = institute.value !== null ? institute.value.data : null,
                     body.regional = regional.value !== null ? regional.value.data : null,
                     body.supervisor = supervisor.value
+                body.paymaster = paymaster.value
             }
         }
 
@@ -544,15 +584,16 @@ async function editUser() {
 
             rows.value = await getUser()
 
+            rows.value.reverse()
+
             paymasterOptions.value = await getUser({ paymaster: true })
 
             regionalOptions.value = await getRegional()
 
             supervisorOptions.value = await getUser({ supervisor: true })
 
-            //await traerTodo()
-
             showDialog.value = false
+
         }
     }
     loading.value = false
@@ -563,21 +604,24 @@ const columns = ref([
         name: 'name',
         label: 'Usuario',
         align: 'center',
-        field: 'name'
+        field: 'name',
+        sortable: true
     },
 
     {
         name: 'mail',
         label: 'Correo Electrónico',
         align: 'center',
-        field: 'mail'
+        field: 'mail',
+        sortable: true
     },
 
     {
         name: 'identification',
         label: 'Cédula',
         align: 'center',
-        field: 'identification'
+        field: 'identification',
+        sortable: true
     },
 
     {
@@ -585,14 +629,16 @@ const columns = ref([
         label: 'Rol',
         align: 'center',
         field: row => row.role,
-        format: (val, row) => optionsRole.value[val.index].label
+        format: (val, row) => optionsRole.value[val.index].label,
+        sortable: true
     },
 
     {
         name: 'position',
         label: 'Cargo',
         align: 'center',
-        field: row => row.position || '-'
+        field: row => row.position || '-',
+        sortable: true
     },
     {
         name: 'estado',
@@ -669,6 +715,5 @@ const paymaster = ref(null)
 
 const paymasterOptions = ref([])
 
-console.log(paymasterOptions);
 
 </script>

@@ -2,7 +2,7 @@
     <q-page class="q-pa-md">
         <div class="text-h4 text-center q-mb-md">Legalización</div>
         <div class="row justify-center q-pt-md">
-            <div v-if="!showPreview" class="col-8" style="width: 90%;">
+            <div v-if="!showPreview" class="col-8 q-mt-md" style="width: 90%;">
                 <!-- <q-table class="my-sticky-header-table" :rows="rows" :columns="columns" row-key="name">
 
                     <template v-slot:body="props">
@@ -234,7 +234,7 @@
             <div class="col-12" />
 
             <div v-if="showPreview">
-                <div id="invoice" ref="invoice" style="width: 65%;">
+                <div id="invoice" ref="invoice" style="margin: 0 auto;">
                     <Preview v-if="!showOther" :row="row" />
 
                     <OtherPreview v-if="showOther" :row="row" />
@@ -244,9 +244,10 @@
             <div v-if="showPreview && user.role.data !== 'user' && user.role.data !== 'administrator' && row.typeSchedule !== 'commission'"
                 class="col-8 q-my-md">
                 <div v-if="!showReject" class="row justify-around">
-                    <q-btn @click="justification = null; showReject = true" :disable='loading' label="Rechazar" />
+                    <q-btn @click="justification = null; showReject = true" :disable='loading' icon="fa-solid fa-xmark"
+                        color="negative" label="Rechazar" />
                     <q-btn @click="getSign()" :loading="loading" :disable='loading' icon="fa-solid fa-signature"
-                        label="Firmar" />
+                        class="bg-primary text-white" label="Firmar" />
                 </div>
 
                 <div v-show="showReject" class="row">
@@ -255,8 +256,10 @@
                     </div>
 
                     <div class="col-12 justify-around flex q-mt-md">
-                        <q-btn @click="justification = null; showReject = false" :disable="loading" label="Cancelar" />
-                        <q-btn @click="postReject()" :loading="loading" :disable="loading" label="Enviar" />
+                        <q-btn @click="justification = null; showReject = false" :disable="loading" label="Cancelar"
+                            color="negative" />
+                        <q-btn @click="postReject()" :loading="loading" :disable="loading" label="Enviar"
+                            class="bg-primary text-white" />
                     </div>
                 </div>
             </div>
@@ -335,7 +338,7 @@
 
                                             <div class="col-12 q-px-sm">
                                                 <q-input v-model="element.items" multiple filled stack-label
-                                                    label="Archivos" type="file" />
+                                                    label="Archivos" type="file" accept="image/*" />
                                             </div>
                                         </div>
                                     </div>
@@ -406,7 +409,7 @@
                             <template v-for="(element, index) in conclusions">
                                 <div class="row q-mt-sm">
                                     <div class="col-10 q-px-sm">
-                                        <q-input type="textarea" v-model="element.data" filled stack-label
+                                        <q-input type="textarea" rows="3" v-model="element.data" filled stack-label
                                             label="Conclusión" />
                                     </div>
 
@@ -435,9 +438,9 @@
                                 </div>
 
                                 <div class="col-10 q-pl-sm" style="background-color: whitesmoke;">
-                                    <q-img
+                                    <q-img fit="contain"
                                         :src="currentUser.staffType && currentUser.staffType.data == 'contractor' ? sign.contractor : sign.publicWorker"
-                                        style="width: 140px; height: 80px;" />
+                                        style="width: 200px; height: 80px;" />
                                 </div>
 
                                 <div class="col-10 justify-end flex q-pb-sm q-pr-sm" style="background-color: whitesmoke;">
@@ -452,9 +455,10 @@
                     <q-separator />
 
                     <q-card-actions class="justify-around">
-                        <q-btn @click="cleanDialog()" :disable="loading" label="Cerrar" color="negative" />
-                        <q-btn @click="postLegalization()" :loading="loading" :disable="loading" label="Guardar"
-                            class="bg-primary text-white" />
+                        <q-btn @click="cleanDialog(); yaFirmo = false" :disable="loading" label="Cerrar"
+                            icon="fa-solid fa-xmark" color="negative" />
+                        <q-btn @click="postLegalization()" icon="fa-solid fa-floppy-disk" :loading="loading"
+                            :disable="yaFirmo === false" label="Guardar" class="bg-primary text-white" />
                     </q-card-actions>
                 </q-card>
             </q-dialog>
@@ -484,7 +488,10 @@ import OtherPreview from '../public/Preview.vue'
 
 let cargando = ref(false)
 
+const loading = ref(false)
+
 const invoice = ref(null)
+
 
 function recargar() {
     window.location.reload()
@@ -579,8 +586,6 @@ onBeforeMount(async function () {
             legalization: true
         })
 
-        console.log(data)
-
         columns.value.unshift(
             {
                 name: 'name',
@@ -594,12 +599,10 @@ onBeforeMount(async function () {
                 align: 'center'
             }
         )
-        console.log(columns.value)
-
         rows.value = data
     }
+    //console.log(currentUser.value);
     cargando.value = false
-    console.log(rows.value);
 })
 
 async function getUser(id) {
@@ -657,6 +660,8 @@ const rows = ref([])
 let filter = ref('')
 const row = ref(null)
 
+let yaFirmo = ref(false)
+
 // const prueba = ref([{ name: '', items: []}])
 
 const columns = ref([
@@ -693,6 +698,7 @@ const columns = ref([
     }
 ])
 
+
 // function getImg(index, items) {
 //     collections.value[index].items = items
 
@@ -721,6 +727,7 @@ async function postLegalization() {
     }
 
     const data = {
+        userId : currentUser.value._id,
         collections: collections.value,
         results: results.value,
         conclusions: conclusions.value,
@@ -745,22 +752,26 @@ async function postLegalization() {
 
     const { status } = await scheduleStore.putLegalization(data, row.value._id)
 
+    /*if (currentUser.value.staffType && currentUser.value.staffType.data == 'contractor' && results.value.length === 1) {
+        showNotify('Faltan resultados', 'negative')
+    }*/
     if (data.status.index == 5 || data.status.index == 6) {
-        showNotify('Legalización firmada', 'positive', '')
+        showNotify('Legalización firmada', 'positive', 'check')
     } else {
-        showNotify('legalización creada', 'positive', '')
+        showNotify('legalización creada', 'positive', 'check')
     }
 
     await cleanDialog()
-    // }
 }
 
 async function getSign() {
     if (user.value.role.data == 'user' || row.value.typeSchedule == 'commission') {
         if (currentUser.value.staffType && currentUser.value.staffType.data == 'contractor') {
             sign.value.contractor = currentUser.value.sign.url
+            yaFirmo.value = true
         } else {
             sign.value.publicWorker = currentUser.value.sign.url
+            yaFirmo.value = true
         }
     }
 
@@ -770,6 +781,7 @@ async function getSign() {
         const { data } = await userStore.getUserParams(user.value.id)
 
         await scheduleStore.putLegalization({
+            //userId: user.value._id,
             status: {
                 data: 'Legalización firmada por Supervisor',
                 index: 6,
@@ -788,11 +800,12 @@ async function getSign() {
 
         rows.value = await getSchedule()
 
-        showNotify('Legalización firmada', 'positive', '')
+        showNotify('Legalización firmada', 'positive', 'check')
 
         showPreview.value = false
     }
 }
+
 
 const sign = ref({
     contractor: null,
@@ -830,30 +843,36 @@ async function cleanDialog() {
 
 async function postReject() {
     loading.value = true
-
-    await scheduleStore.putLegalization({
-        status: {
-            data: 'Legalización Rechazada',
-            index: 4,
-            justification: justification.value ? justification.value : '-'
-        },
-        legalization: {
-            signature: {
-                contractor: null
+    //console.log(currentUser.value);
+    
+    if (!justification.value) {
+        showNotify('Proporcione una justificación', 'negative')
+    } else {
+        await scheduleStore.putLegalization({
+            userId: currentUser.value._id,
+            status: {
+                data: 'Legalización Rechazada',
+                index: 4,
+                justification: justification.value ? justification.value : '-'
+            },
+            legalization: {
+                signature: {
+                    contractor: null
+                }
             }
-        }
-    }, row.value._id)
+        }, row.value._id)
 
-    showNotify('Legalización rechazada', 'negative')
+        showNotify('Legalización rechazada', 'info', 'info')
 
-    rows.value = await getSchedule()
+        rows.value = await getSchedule()
 
+        loading.value = false
+
+        showPreview.value = false
+    }
     loading.value = false
-
-    showPreview.value = false
 }
 
-const loading = ref(false)
 
 const justification = ref(null)
 

@@ -110,7 +110,7 @@ onBeforeMount(async () => {
             { label: 'Home', link: '/layout/home', icon: 'house' },
             { label: 'Perfil de Usuario', link: '/layout/perfil', icon: 'person' },
             { label: 'Solicitudes', link: '/layout/agenda/solicitudes', icon: 'fa-solid fa-person-circle-question' },
-            { label: 'Solicitudes Legalización', link: '/layout/agenda/legalizacion', icon: 'fa-solid fa-file-contract' },
+            { label: 'Solicitudes Legalización Contratista', link: '/layout/agenda/legalizacion', icon: 'fa-solid fa-file-contract' },
             { label: 'Crear Agenda', link: '/layout/agenda/funcionario/crear', icon: 'fa-solid fa-calendar' },
             { label: 'Crear Legalización', link: '/layout/agenda/funcionario/legalizacion', index: true, icon: 'fa-solid fa-signature' },
             { label: 'Historico', link: '/layout/agenda/historico', icon: 'fa-solid fa-clipboard' }

@@ -13,8 +13,6 @@ const httpUser = {
 
         const user = await User.find().populate("paymaster").populate("supervisor").populate("regional").populate("institute")
 
-        //const user = await User.find()
-
         for (let index = 0; index < user.length; index++) {
             if (req.query.user) {
                 if (user[index].role.data == 'user') {
@@ -122,7 +120,7 @@ const httpUser = {
                     <p style="font-size: 16px; font-weight:bold;color: #333">BIENVENIDO(A) A VILE</p>
                     <img src="cid:bienvenida" alt="Bienvenida" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
                     <p style="font-size: 16px; font-weight:bold;color: #333">Hola ${user.name},</p>
-                    <p style="font-size: 16px; color: #333;">Ha sido registrado(a) en la plataforma VILE (Viajes y Legalizaciones) del Centro Agroturístico con el rol de <strong>${user}. Estas son sus
+                    <p style="font-size: 16px; color: #333;">Ha sido registrado(a) en la plataforma VILE (Viajes y Legalizaciones) del Centro Agroturístico. Estas son sus
                     credenciales de acceso:</p>
                     <p style="font-size:16px;color: #333;"><strong>No. de documento: </strong>${user.identification}</p>
                     <p style="font-size:16px;color: #333;"><strong>Contraseña: </strong>${req.body.password}</strong></p>
@@ -208,35 +206,35 @@ const httpUser = {
 
     },
 
-    postUpload: async (req, res) => {
-        if (!req.files) {
-
-            return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
-        }
-
-        const file = req.files.file;
-
-
-        if (!file) {
-            return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
-        }
-
-        const nameFile = file.name;
-        const extension = nameFile.split(".").pop();
-        if (extension !== "xlsx" && extension !== "xls") {
-            return res.status(400).json({ msg: 'El archivo no es valido' })
-        }
-
-        generateInfoOfExcel(file, req);
-
-        fs.unlink(file.tempFilePath, function (err) {
-            if (err) {
-                console.log(err)
-            }
-        })
-
-        res.send("loco")
-    },
+    /*  postUpload: async (req, res) => {
+         if (!req.files) {
+ 
+             return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
+         }
+ 
+         const file = req.files.file;
+ 
+ 
+         if (!file) {
+             return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
+         }
+ 
+         const nameFile = file.name;
+         const extension = nameFile.split(".").pop();
+         if (extension !== "xlsx" && extension !== "xls") {
+             return res.status(400).json({ msg: 'El archivo no es valido' })
+         }
+ 
+         generateInfoOfExcel(file, req);
+ 
+         fs.unlink(file.tempFilePath, function (err) {
+             if (err) {
+                 console.log(err)
+             }
+         })
+ 
+         res.send("loco")
+     }, */
 
     putSign: async (req, res) => {
         const { id } = req.params
@@ -253,6 +251,9 @@ const httpUser = {
                     await cloudinary.v2.uploader.destroy(
                         user.sign.public_id,
                         {
+                            transformation: [
+                                { height: 200, width: 280, crop: 'limit' },
+                            ],
                             resource_type: 'image',
                             type: 'upload',
                             format: 'png'
@@ -283,6 +284,7 @@ const httpUser = {
                         const result = await cloudinary.v2.uploader.upload(
                             `uploads/${file.name}`,
                             {
+                                resource_type: 'image',
                                 public_id: 'firma',
                                 folder: `/test/${user.mail}`,
                                 // filename_override: 'firma',
@@ -329,13 +331,13 @@ const httpUser = {
         const user = await User.findOne({ identification: identification })
 
         if (!user) {
-            return res.status(404).json({ msg: 'Credenciales inválidas' })
+            return res.status(400).json({ msg: 'Credenciales inválidas' })
         } else if (user.status === 0) {
-            return res.status(404).json({ msg: 'Usuario inactivo' })
+            return res.status(400).json({ msg: 'Usuario inactivo' })
         } else {
-            await bcrypt.compare(password, user.password, async function (err, result) {
+            bcrypt.compare(password, user.password, async function (err, result) {
                 if (result == true) {
-                    await jwt.sign({ mail: user.mail, identification: user.identification, id: user._id, role: user.role, staffType: user.staffType }, process.env.PRIVATE_KEY, function (err, token) {
+                    jwt.sign({ mail: user.mail, identification: user.identification, id: user._id, role: user.role, staffType: user.staffType }, process.env.PRIVATE_KEY, function (err, token) {
                         // console.log(token)
                         return res.status(200).json({ token: token })
                     })
@@ -354,7 +356,7 @@ const httpUser = {
             if (usuario) {
                 usuario.status = status;
                 await usuario.save();
-                res.json(usuario);
+                res.json({ msg: 'Estado cambiado con éxito', usuario });
             } else {
                 res
                     .status(404)
@@ -371,9 +373,9 @@ const httpUser = {
 
             const { mail } = req.body;
 
-            if (typeof mail === 'string') {
+            /* if (typeof mail === 'string') {
                 mail.trim();
-            }
+            } */
 
             const usuario = await User.findOne({ mail: mail })
 
@@ -454,8 +456,8 @@ const httpUser = {
                 return res.status(400).json({ msg: 'La nueva contraseña no es valida' })
             }
 
-            const salt = bcrypt.genSaltSync(10);
-            const hashedPassword = bcrypt.hashSync(nuevaContrasena, salt);
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(nuevaContrasena, salt);
             usuario.password = hashedPassword
             usuario.recuperacion = null;
             await usuario.save();

@@ -14,30 +14,14 @@ aprendizsena
 
 https://vile-cat.onrender.com
 
-USUARIOS
-
-Ordenador:
+1234567890
+admin
 
 11223344
-ordenador
-
-Supervisor:
-
-1234567
-supervisor
-
-Funcionario
+super
 
 987654321
-funcionario
-
-Contratista
-
-24681012
 contratista
 
-Admin
-
-123456789
-1234567890
-
+24681012
+funcionario

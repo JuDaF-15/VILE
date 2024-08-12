@@ -16,7 +16,7 @@ routerUser.post('/', [], httpUser.postUser)
 
 routerUser.post('/login', httpUser.postLogin)
 
-routerUser.post('/uploadfile', httpUser.postUpload)
+//routerUser.post('/uploadfile', httpUser.postUpload)
 
 routerUser.put('/sign/:id', httpUser.putSign)
 

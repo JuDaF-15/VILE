@@ -366,14 +366,14 @@
                                 <p class="q-my-none q-pl-sm">FIRMA ORDENADOR DE GASTO:</p>
 
                                 <q-img v-if="sign.paymaster" fit="contain" :src="sign.paymaster"
-                                    style="width: 140px; height: 80px;" />
+                                style="width: 180px; height: 80px;margin-left: 6.5px;margin-top: 4px;" />
                             </div>
 
                             <div class="col-4 border-right border-bottom">
                                 <p class="q-my-none q-pl-sm">FIRMA SUPERVISOR DEL CONTRATO:</p>
 
                                 <q-img v-if="sign.supervisor" fit="contain" :src="sign.supervisor"
-                                    style="width: 140px; height: 80px;" />
+                                style="width: 180px; height: 80px;margin-left: 6.5px;margin-top: 4px;" />
 
                             </div>
 
@@ -381,7 +381,7 @@
                                 <p class="q-my-none q-pl-sm">FIRMA DEL CONTRATISTA:</p>
 
                                 <q-img v-if="sign.contractor" fit="contain" :src="sign.contractor"
-                                    style="width: 140px; height: 80px;" />
+                                style="width: 180px; height: 80px;margin-left: 6.5px;margin-top: 4px;" />
                             </div>
                         </div>
                     </div>

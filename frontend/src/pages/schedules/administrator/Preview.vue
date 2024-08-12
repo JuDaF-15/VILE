@@ -1,8 +1,6 @@
 <template>
     <div class="col-6" style="border: 2px solid black;">
 
-        <q-btn label="probar" @click="generateReport" />
-
         <div class="row q-pb-md" style="border-bottom: 1px solid black;">
             <div class="col-2 q-mt-xs q-pl-xs">
                 <q-img src="../../../assets/sena-icono.png" fit="contain" style="height: 60px; width: 60px;" />
@@ -218,7 +216,7 @@
             </div>
 
             <div class="col-4">
-                <q-img v-if="sign.contractor" fit="container" :src="sign.contractor" style="width: 140px; height: 80px;" />
+                <q-img v-if="sign.contractor" fit="container" :src="sign.contractor" style="width: 180px; height: 75px;margin-left: 6.5px;margin-top: 4px;" />
             </div>
         </div>
 
@@ -250,7 +248,7 @@
             </div>
 
             <div class="col-4">
-                <q-img v-if="sign.supervisor" fit="container" :src="sign.supervisor" style="width: 140px; height: 80px;" />
+                <q-img v-if="sign.supervisor" fit="container" :src="sign.supervisor" style="width: 180px; height: 75px;margin-left: 6.5px;margin-top: 4px;" />
             </div>
         </div>
     </div>

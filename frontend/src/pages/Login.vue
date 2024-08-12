@@ -8,7 +8,7 @@
                         <q-card-section style="background-color: rgb(46, 125, 50); height: 70px;">
                             <div class="row items-center justify-center">
                                 <!-- <div class="col-12"> -->
-                                <p class="q-my-none text-center" style="font-size: 35px; color: white;">
+                                <p class="text-h4 text-center" style="font-size: 35px; color: white;">
                                     <strong>VILE</strong>
                                 </p>
                                 <!-- </div> -->
@@ -166,7 +166,7 @@ async function goHome() {
             $q.localStorage.set('token', data.token)
             $q.localStorage.set('user', data.user)
             router.push('/layout')
-            showNotify('Inicio de sesión exitoso', 'positive', 'check')
+            showNotify('Inicio de sesión exitoso', 'positive','check')
         }
     }
     loading.value = false
@@ -203,7 +203,7 @@ async function envioCorreo() {
             $q.notify({
                 message: envio.data.msg,
                 color: "positive",
-                icon: 'check',
+                type: 'positive',
                 position: 'bottom',
                 timeout: 4500
             })

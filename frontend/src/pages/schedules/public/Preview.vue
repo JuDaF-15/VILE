@@ -1,5 +1,5 @@
 <template>
-    <div class="col-6" style="border: 2px solid black" id="invoice">
+    <div class="col-6" style="border: 2px solid black">
         <div class="row" style="border-bottom: 1px solid black;">
             <div class="col-2 justify-center flex q-py-xs" style="border-right: 1px solid black">
                 <q-img src="../../../assets/sena-icono-nuevo.png" fit="contain" style="height: 70px; width: 70px;" />
@@ -248,7 +248,7 @@
                     <div class="row">
                         <div class="col-12">
                             <q-img v-if="signature.publicWorker !== null" :src="signature.publicWorker" fit="contain"
-                                style="width: 140px; height: 80px;" />
+                                style="width: 180px; height: 80px;margin-left: 6.5px;margin-top: 4px;" />
                             <p class="q-my-none q-pl-sm"><strong v-text="'Firma'" /></p>
                         </div>
                         <div class="col-12">
@@ -261,7 +261,7 @@
                     <div class="row">
                         <div class="col-12">
                             <q-img v-if="signature.paymaster !== null" :src="signature.paymaster" fit="contain"
-                                style="width: 140px; height: 80px;" />
+                                style="width: 180px; height: 80px;margin-left: 6.5px;margin-top: 4px;" />
                             <p class="q-my-none q-pl-sm"><strong v-text="'Firma'" /></p>
                         </div>
 

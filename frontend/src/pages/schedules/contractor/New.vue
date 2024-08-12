@@ -5,7 +5,7 @@
 
             <!-- table -->
 
-            <div v-show="!showPreview" class="col-8" style="width: 90%;">
+            <div v-show="!showPreview" class="col-8 q-mt-md" style="width: 90%;">
                 <!-- <q-table class="my-sticky-header-table" :filter="filter" :rows="rows" :columns="columns">
                     <template v-slot:top-right>
                         <q-input dense debounce="300" color="primary" v-model="filter" placeholder="Buscar">
@@ -153,6 +153,13 @@
                             </q-icon>
                         </q-td>
                     </template>
+
+                    <template v-slot:body-cell-estado="props">
+                        <q-td :props="props">
+                            <span :class="{ 'text-red': props.row.status.data === 'Agenda rechazada' }">Rechazada</span>
+                        </q-td>
+                    </template>
+
 
                 </q-table>
             </div>
@@ -766,7 +773,7 @@
                                     </div>
 
                                     <div class="col-12 q-pl-sm">
-                                        <q-img :src="sign.contractor" style="width: 140px; height: 80px;" />
+                                        <q-img :src="sign.contractor" fit="contain" style="width: 200px; height: 80px;" />
                                     </div>
                                     <div class="col-12 justify-end flex q-pb-sm q-pr-sm">
                                         <q-btn :disable="sign.contractor !== null" @click="getSign()"
@@ -1034,6 +1041,11 @@ const columns = ref([
         name: 'opciones',
         label: 'Acciones',
         align: 'center'
+    },
+    {
+        name: 'estado',
+        label: 'Estado',
+        align: 'center'
     }
 ])
 
@@ -1234,7 +1246,6 @@ const goRoute = ref([])
 
 const maingoCity = ref([])
 
-
 const returncountyOptions = ref([])
 
 const returncityOptions = ref([])
@@ -1250,7 +1261,6 @@ const returnCity = ref(null)
 const returnRoute = ref([])
 
 const mainreturnCity = ref([])
-
 
 const meanstransportOptions = ref([{ data: 0, label: 'Aéreo' }, { data: 1, label: 'Terrestre' }, { data: 2, label: 'Fluvial' }])
 
@@ -1320,7 +1330,6 @@ const placeCity = ref(null)
 const mainplaceCounty = ref([])
 
 const mainplaceCity = ref([])
-
 
 const company = ref(null)
 
@@ -1558,6 +1567,7 @@ async function updateSchedule() {
         showNotify('No hay observaciones', 'negative')
     } else {
         await scheduleStore.putSchedule({
+            userId: currentUser.value._id,
             route: {
                 go: goRoute.value,
                 return: returnRoute.value
@@ -1605,9 +1615,6 @@ async function updateSchedule() {
     border-bottom: 1px solid black;
 }
 
-.border-right {
-    border-right: 1px solid black;
-}
 
 #invoice {
     font-family: Arial, sans-serif;

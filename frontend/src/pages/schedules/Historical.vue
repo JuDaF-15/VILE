@@ -2,7 +2,7 @@
     <q-page class="q-pa-md">
         <div class="text-h4 text-center q-mb-md">Histórico</div>
         <div class="row justify-center q-pt-md">
-            <div class="col-8" style="width: 90%;">
+            <div class="col-8 q-mt-md" style="width: 90%;">
                 <q-table :loading="cargando" class="my-sticky-header-table" :columns="columns" :rows="rows">
                     <template v-slot:body-cell-route="props">
                         <td :props="props">

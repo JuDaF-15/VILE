@@ -10,7 +10,7 @@
                 margin-top: 5px;
               " /> <br>
                 <div class="col-8" style="font-size: 18px;">
-                    
+
                     <div class="row q-pb-sm">
                         <div class="col-6">
                             <p class="q-my-none"><strong v-text="'Nombre de Usuario: '" />{{ name }}</p><br>
@@ -26,7 +26,7 @@
                         </div>
                     </div>
                     <br>
-                    
+
                     <div v-if="showSign" class="row">
                         <div class="col-12 q-mb-sm">
                             <b>Firma</b>
@@ -34,10 +34,15 @@
                         <div class="col-6 q-px-sm">
                             <div class="row">
                                 <div class="col-12 q-mb-sm">
-                                    <q-input v-model="file" filled type="file" accept="image/*" />
+                                    <q-input filled v-model="file" type="file" accept="image/*">
+                                        <template v-slot:prepend>
+                                            <q-icon name="image" />
+                                        </template>
+                                    </q-input>
                                 </div>
                                 <div class="col-12 justify-end flex">
-                                    <q-btn @click="putSign()" :disable="loading" :loading="loading" icon="upload" class="bg-blue text-white" label="Subir" />
+                                    <q-btn @click="putSign()" :disable="loading" :loading="loading" icon="upload"
+                                        class="bg-blue text-white" label="Subir" />
                                 </div>
                             </div>
                         </div>
@@ -111,7 +116,10 @@ onBeforeMount(async () => {
 })
 
 async function putSign() {
-    if (file.value !== null) {
+    if (!file.value) {
+        showNotify('No ha cargado una firma', 'negative')
+
+    } else {
         loading.value = true
 
         const { status } = await userStore.putSign(currentUser.value.id, { test: file.value[0] })
@@ -123,7 +131,9 @@ async function putSign() {
 
             sign.value = data.sign
 
-            showNotify('Firma modificada', 'positive', '')
+            showNotify('Firma modificada', 'positive', 'check')
+
+            file.value = null
         }
 
         loading.value = false

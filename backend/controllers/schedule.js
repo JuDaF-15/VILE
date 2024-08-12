@@ -9,7 +9,7 @@ import sendEmail from "../middlewares/sendEmail.js"
 import fs from 'fs'
 
 const httpSchedule = {
-   
+
     postSchedule: async (req, res) => {
 
         const schedule = new Schedule(req.body)
@@ -78,7 +78,7 @@ const httpSchedule = {
                     if (error) {
                         console.log(error);
                     } else {
-                        console.log('Correo enviado');
+                        console.log('Correo de creación de agenda enviado a supervisor');
                     }
                 });
             } else if (user.role.data === "user" && user.staffType.data === "publicWorker") {
@@ -123,7 +123,7 @@ const httpSchedule = {
                     if (error) {
                         console.log(error);
                     } else {
-                        console.log('Correo enviado');
+                        console.log('Correo de creacion de agenda funcionario enviado');
                     }
                 });
             } else if (user.role.data = "supervisor") {
@@ -163,7 +163,7 @@ const httpSchedule = {
                     if (error) {
                         console.log(error);
                     } else {
-                        console.log('Correo enviado');
+                        console.log('Correo de creacion de agenda supervisor enviado');
                     }
                 });
             }
@@ -310,11 +310,11 @@ const httpSchedule = {
     putSchedule: async (req, res) => {
         const { id } = req.params
 
-        // Aquí asumo que estás enviando el nuevo estado de la agenda en req.body.status
+        // Se envia el nuevo estado de la agenda en req.body.status
         const schedule = await Schedule.findByIdAndUpdate(id, req.body, { new: true });
 
         // Obtener el usuario que creó la agenda
-        const creator = await User.findOne({ mail: schedule.contract.mail }).populate('paymaster');
+        const creator = await User.findOne({ mail: schedule.contract.mail }).populate('paymaster').populate('supervisor');
 
         /* if (!creator || !paymaster) {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
@@ -404,6 +404,92 @@ const httpSchedule = {
                 });
             }
 
+        } else if (req.body.status.data === 'Agenda firmada por Contratista') {
+            // CUANDO EL CONTRATISTA MODIFICA AGENDA, NOTIFICAR AL SUPERVISOR
+
+            // NOTIFICAR AL SUPERVISOR
+            let creatorMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.supervisor.mail,
+                subject: 'Agenda Modificada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA MODIFICADA</p>
+                    <img src="cid:editar" alt="Editada" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.supervisor.name},</p>
+                    <p style="font-size: 16px; color: #333;">El contratista <strong>${creator.name}</strong> ha modificado una agenda creada. Queda pendiente por su aprobación
+                    o rechazo.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'editar.png',
+                    path: './images/editar.png',
+                    cid: 'editar'
+                }]
+            };
+
+            sendEmail.sendMail(creatorMailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo al supervisor:', error);
+                } else {
+                    console.log('Correo al supervisor enviado correctamente');
+                }
+            });
+
+
+        } else if (req.body.status.data === 'Agenda firmada por Funcionario') {
+            // CUANDO EL FUNCIONARIO MODIFICA AGENDA, NOTIFICAR AL ORDENADOR
+
+            // NOTIFICAR AL ORDENADOR
+            let creatorMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.paymaster.mail,
+                subject: 'Agenda Modificada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA MODIFICADA</p>
+                    <img src="cid:editar" alt="Editada" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.paymaster.name},</p>
+                    <p style="font-size: 16px; color: #333;">El funcionario <strong>${creator.name}</strong> ha modificado una agenda creada. Queda pendiente por su aprobación
+                    o rechazo.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'editar.png',
+                    path: './images/editar.png',
+                    cid: 'editar'
+                }]
+            };
+
+            sendEmail.sendMail(creatorMailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo al supervisor:', error);
+                } else {
+                    console.log('Correo al ordenador enviado correctamente');
+                }
+            });
+
+
         } else if (req.body.status.data === "Agenda firmada por Supervisor") {
 
             // CUANDO EL SUPERVISOR FIRMA AGENDA, NOTIFICAR AL CONTRATISTA Y ORDENADOR
@@ -448,9 +534,9 @@ const httpSchedule = {
                 to: creator.paymaster.mail,
                 subject: 'Agenda Aprobada y Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
-                    <div style="background-color: #39a900;display:flex;align-items:center;padding:10px;justify-content:center">
-                    <img src="cid:logo_sena" alt="Logo del Sena" style="width: 50px; height: 50px;">
-                    <h2 style="color:white;margin-left:10px">VILE</h2>
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
                     </div><br />
                     <p style="font-size: 16px; color: #333;font-weight:bold">AGENDA FIRMADA</p>
                     <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
@@ -587,7 +673,7 @@ const httpSchedule = {
             let mailOptions = {
                 from: '<vilecat270@gmail.com>',
                 to: creator.mail,
-                subject: 'Legalización Creada',
+                subject: 'Proceso de Legalización',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
                     <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
                     <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
@@ -596,7 +682,7 @@ const httpSchedule = {
                     <p style="font-size: 16px; color: #333;font-weight:bold">LEGALIZACIÓN CREADA</p>
                     <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
                     <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.name},</p>
-                    <p style="font-size: 16px; color: #333;">El administrador <strong>${admin.name}</strong> ha creado la legalización de su agenda con
+                    <p style="font-size: 16px; color: #333;"><strong>${admin.name}</strong> ha creado la legalización de su agenda con
                     número de orden de viaje <strong>${schedule.tripOrder}</strong>. Queda pendiente por que usted agregue las evidencias y/o soportes y conclusiones y que la firme</p>
                     <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
                     <span>*Este correo es generado automáticamente, por favor no responder</span>
@@ -622,7 +708,7 @@ const httpSchedule = {
                     console.log('Correo de legalización enviado correctamente');
                 }
             });
-            
+
         }
 
         return res.status(200).json({ msg: 'Agenda modificada' })
@@ -805,6 +891,130 @@ const httpSchedule = {
 
         await Schedule.findByIdAndUpdate(id, data)
 
+        //const creator = await User.findOne({ mail: schedule.contract.mail }).populate('supervisor');
+
+        const creator = await User.findById(req.body.userId).populate('supervisor')
+        const sup = await User.findById(req.body.userId)
+
+        const link = 'https://vile-cat.onrender.com'
+
+        if (req.body.status.data === 'Legalización firmada por Contratista') {
+            let mailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: creator.supervisor.mail,
+                subject: 'Legalización Firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">LEGALIZACIÓN FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${creator.supervisor.name},</p>
+                    <p style="font-size: 16px; color: #333;">El contratista <strong>${creator.name}</strong> ha firmado una legalización. Queda pendiente por su
+                    firma o rechazo.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+            };
+
+            sendEmail.sendMail(mailOptions, function (error) {
+                if (error) {
+                    console.log('Error al enviar correo de legalizacion firmada al supervisor:', error);
+                } else {
+                    console.log('Correo de legalización al supervisor enviado correctamente');
+                }
+            });
+
+        } else if (req.body.status.data === 'Legalización Rechazada') {
+
+            let SupervisorMailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: schedule.contract.mail,
+                subject: 'Agenda Rechazada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                         <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                         <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                         <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                         </div><br />
+                         <p style="font-size: 16px; color: #333;font-weight:bold">LEGALIZACIÓN RECHAZADA</p>
+                         <img src="cid:rechazar" alt="Rechazar" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                         <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${schedule.contract.contractorName},</p>
+                         <p style="font-size: 16px; color: #333;">Su supervisor de contrato <strong>${sup.name}</strong> ha rechazado su legalización con la 
+                         siguiente justificacion: <strong>${schedule.status.justification}</strong></p>
+                         <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                         <span>*Este correo es generado automáticamente, por favor no responder</span>
+                     </div>
+                     `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'rechazar.png',
+                    path: './images/rechazar.png',
+                    cid: 'rechazar'
+                }]
+            }
+            sendEmail.sendMail(SupervisorMailOptions, function (error) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Correo de rechazo de legalización enviado a contratista');
+                }
+            });
+        } else if (req.body.status.data === 'Legalización firmada por Supervisor') {
+
+            let mailOptions = {
+                from: '<vilecat270@gmail.com>',
+                to: schedule.contract.mail,
+                subject: 'Legalización aprobada y firmada',
+                html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
+                    <div style="background-color: #39a900; text-align: center; line-height: 50px;padding:10px">
+                    <img src="cid:logo_sena" alt="Logo del Sena" style="vertical-align: middle; width: 50px; height: 50px;">
+                    <h1 style="color:white; display: inline-block; margin-left:10px; line-height: normal;">VILE</h1>
+                    </div><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">LEGALIZACIÓN FIRMADA</p>
+                    <img src="cid:aceptar" alt="Aceptación" style="display: block; margin: 0 auto; max-width: 20%; height: auto;"><br />
+                    <p style="font-size: 16px; color: #333;font-weight:bold">Hola ${schedule.contract.contractorName},</p>
+                    <p style="font-size: 16px; color: #333;">Su supervisor de contrato <strong>${schedule.supervisor.name}</strong> ha aprobado y firmado su legalización.</p>
+                    <a href="${link}" style="display: inline-block; padding: 10px 20px; background-color: #39a900; color: #fff; text-decoration: none; border-radius: 5px; text-align: center; margin: 20px auto;">IR A VILE</a><br />
+                    <span>*Este correo es generado automáticamente, por favor no responder</span>
+                </div>
+                `,
+                attachments: [{
+                    filename: 'logo-sena-blanco.png',
+                    path: './images/logo-sena-blanco.png',
+                    cid: 'logo_sena'
+                },
+                {
+                    filename: 'aceptar.png',
+                    path: './images/aceptar.png',
+                    cid: 'aceptar'
+                }]
+
+            };
+
+            sendEmail.sendMail(mailOptions, function (error) {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log('Correo de aprobación de legalización enviado a contratista');
+                }
+            });
+        }
         return res.status(200).json({ msg: 'Agenda prueba' })
     }
 }

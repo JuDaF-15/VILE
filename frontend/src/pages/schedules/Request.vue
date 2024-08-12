@@ -219,7 +219,7 @@
 
             <div class="col-8 justify-end  flex q-mb-md">
                 <q-btn @click="row = null; showOther = false; showPreview = false" icon="fa-solid fa-arrow-left"
-                    label="Atrás" class="bg-green text-white" />
+                    label="Atrás" class="bg-primary text-white" />
             </div>
 
             <div class="col-12" />
@@ -239,7 +239,7 @@
                         <q-btn @click="showReject = !showReject" label="Rechazar" icon="fa-solid fa-xmark"
                             color="negative" />
 
-                        <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-green text-white"
+                        <q-btn @click="getSign()" label="Firmar" icon="fa-solid fa-signature" class="bg-primary text-white"
                             :loading="loading" />
 
                     </div>
@@ -251,7 +251,7 @@
                     </div>
 
                     <div align="right" class="col-12 q-pa-sm">
-                        <q-btn @click="updateSchedule(row._id)" label="Crear Legalización" class="bg-green text-white" />
+                        <q-btn @click="updateSchedule(row._id)" label="Crear Legalización" class="bg-primary text-white" :loading="loading" />
                     </div>
                 </div>
             </div>
@@ -264,7 +264,7 @@
                     <div class="col-12 justify-around flex q-mt-sm">
                         <q-btn @click="justification = null; showReject = false" label="Cancelar" color="negative" />
                         <q-btn @click="updateSchedule(row._id)" label="Enviar" :loading="loading"
-                            class="bg-green text-white" />
+                            class="bg-primary text-white" />
                     </div>
                 </div>
             </div>
@@ -552,7 +552,7 @@ async function updateSchedule(id) {
                 userId: user.value.id,
                 tripOrder: tripOrder.value,
                 status: status
-            }, id)
+            }, row.value._id)
 
             rows.value = await getSchedule()
 

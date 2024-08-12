@@ -90,7 +90,7 @@ async function cambioContrasena() {
                 message: envio.data.msg,
                 color: "positive",
                 icon: "check",
-                position: "top",
+                position: "bottom",
                 timeout: 3000,
             });
             router.push("/")

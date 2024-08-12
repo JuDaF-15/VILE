@@ -771,7 +771,7 @@
                                     </div>
 
                                     <div class="col-12">
-                                        <q-img :src="sign.publicWorker" style="width: 140px; height: 80px;" />
+                                        <q-img :src="sign.publicWorker" fit="contain" style="width: 200px; height: 80px;" />
                                     </div>
 
                                     <div class="col-12 justify-end flex q-pb-sm q-pr-sm">
@@ -1193,6 +1193,7 @@ async function updateSchedule() {
         showNotify('Digite el objeto', 'negative')
     } else {
         await scheduleStore.putSchedule({
+            userId: currentUser.value._id,
             route: {
                 go: goRoute.value,
                 return: returnRoute.value
