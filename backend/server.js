@@ -1,16 +1,16 @@
 import express from 'express'
-import connect from '../database/index.js'
+import connect from './database/index.js'
 
 import fileupload from 'express-fileupload'
 
-import { routerUser } from '../routes/user.js'
+import { routerUser } from './routes/user.js'
 
-import { routerSchedule } from '../routes/schedule.js'
+import { routerSchedule } from './routes/schedule.js'
 
-import { routerCounty } from '../routes/county.js'
-import { routerCity } from '../routes/city.js'
+import { routerCounty } from './routes/county.js'
+import { routerCity } from './routes/city.js'
 
-import { routerInstitute } from '../routes/institute.js'
+import { routerInstitute } from './routes/institute.js'
 
 import cors from 'cors'
 
@@ -45,7 +45,7 @@ class Server {
     }
 
     listen() {
-        this.app.listen(process.env.PORT, () => { console.log('server online')})
+        this.app.listen(process.env.PORT, () => { console.log('servidor iniciado!')})
     }
 }
 

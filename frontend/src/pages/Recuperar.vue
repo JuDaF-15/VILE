@@ -89,7 +89,7 @@ async function cambioContrasena() {
             $q.notify({
                 message: envio.data.msg,
                 color: "positive",
-                icon: "check",
+                icon: "check_circle",
                 position: "bottom",
                 timeout: 3000,
             });

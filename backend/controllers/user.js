@@ -106,10 +106,10 @@ const httpUser = {
 
             await user.save()
 
-            const link = 'https://vile-cat.onrender.com'
+            const link = process.env.CLIENT_URL
 
             let mailOptions = {
-                from: 'vilecat270@gmail.com',
+                from: process.env.MAIL_ADDRESS,
                 to: user.mail,
                 subject: 'Bienvenido a VILE',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -205,37 +205,7 @@ const httpUser = {
         }
 
     },
-
-    /*  postUpload: async (req, res) => {
-         if (!req.files) {
- 
-             return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
-         }
- 
-         const file = req.files.file;
- 
- 
-         if (!file) {
-             return res.status(400).json({ msg: 'No se ha cargado ningún archivo' })
-         }
- 
-         const nameFile = file.name;
-         const extension = nameFile.split(".").pop();
-         if (extension !== "xlsx" && extension !== "xls") {
-             return res.status(400).json({ msg: 'El archivo no es valido' })
-         }
- 
-         generateInfoOfExcel(file, req);
- 
-         fs.unlink(file.tempFilePath, function (err) {
-             if (err) {
-                 console.log(err)
-             }
-         })
- 
-         res.send("loco")
-     }, */
-
+    
     putSign: async (req, res) => {
         const { id } = req.params
 
@@ -339,7 +309,7 @@ const httpUser = {
                 if (result == true) {
                     jwt.sign({ mail: user.mail, identification: user.identification, id: user._id, role: user.role, staffType: user.staffType }, process.env.PRIVATE_KEY, function (err, token) {
                         // console.log(token)
-                        return res.status(200).json({ token: token })
+                        return res.status(200).json({ msg: 'Inicio de sesión exitoso', token })
                     })
                 } else {
                     return res.status(400).json({ msg: 'Credenciales inválidas' })
@@ -393,7 +363,7 @@ const httpUser = {
             await usuario.save();
             try {
                 await sendEmail.sendMail({
-                    from: `<vilecat270@gmail.com>`,
+                    from: process.env.MAIL_ADDRESS,
                     to: usuario.mail,
                     subject: "Restablecimiento de contraseña",
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">

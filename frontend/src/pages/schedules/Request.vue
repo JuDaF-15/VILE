@@ -2,8 +2,8 @@
     <q-page class="q-pa-md">
         <div class="text-h4 text-center q-mb-md">Solicitudes</div>
 
-        <div v-if="!showPreview" class="row justify-center q-mt-md">
-            <div class="col-8" style="width: 90%;">
+        <div v-if="!showPreview" class="row justify-center q-pt-md">
+            <div class="col-8 q-mt-md" style="width: 90%;">
                 <!-- <q-table class="my-sticky-header-table" :filter="filter" :columns="columns" :rows="rows">
                     <template v-slot:body="props">
                         <tr :props="props" @click="function () {
@@ -373,6 +373,8 @@ onBeforeMount(async () => {
         })
     }
 
+    rows.value.reverse()
+
     cargando.value = false
 
     //console.log(rows.value)
@@ -423,7 +425,7 @@ async function getSign() {
 
         row.value = null
 
-        showNotify('Agenda firmada', 'positive', 'check')
+        showNotify('Agenda firmada', 'positive', 'check_circle')
 
         showPreview.value = false
     } else {
@@ -451,13 +453,15 @@ const columns = ref([
     {
         name: 'name',
         label: 'Nombres y Apellidos',
-        align: 'center'
+        align: 'center',
+        sortable: 'true'
     },
 
     {
         name: 'typeSchedule',
         label: 'Tipo de Agenda',
-        align: 'center'
+        align: 'center',
+        sortable: true
     },
 
     {
@@ -465,25 +469,29 @@ const columns = ref([
         label: 'Ruta',
         align: 'center',
         style: 'width: 300px',
-        headerStyle: 'width: 300px;'
+        headerStyle: 'width: 300px;',
+        sortable:true
     },
 
     {
         name: 'place',
         label: 'Lugar Desplazamiento',
-        align: 'center'
+        align: 'center',
+        sortable: true
     },
 
     {
         name: 'company',
         label: 'Entidad o Empresa',
-        align: 'center'
+        align: 'center', 
+        sortable: true
     },
 
     {
         name: 'tripDate',
         label: 'Fecha Desplazamiento',
-        align: 'center'
+        align: 'center',
+        sortable:true
     },
     {
         name: 'opciones',
@@ -526,7 +534,7 @@ async function updateSchedule(id) {
                 })
             }
 
-            console.log(user.value._id),
+            //console.log(user.value._id),
 
                 showReject.value = false
 
@@ -535,6 +543,8 @@ async function updateSchedule(id) {
             showNotify('Agenda Rechazada', 'info', 'info')
 
             showPreview.value = false
+
+            justification.value = ''
         }
     } else {
         if (user.value.role.data == 'administrator' && !tripOrder.value) {
@@ -546,7 +556,7 @@ async function updateSchedule(id) {
 
             status.data = 'Agenda en Proceso de Legalización'
 
-            console.log(status)
+            //console.log(status)
 
             await scheduleStore.putSchedule({
                 userId: user.value.id,
@@ -562,7 +572,7 @@ async function updateSchedule(id) {
 
             showPreview.value = false
 
-            showNotify('Legalización creada', 'positive', 'check')
+            showNotify('Legalización creada', 'positive', 'check_circle')
 
         } else {
             showNotify(`Digite el número ${row.value.typeSchedule == 'contractor' ? 'Orden de Viaje' : 'Comisión de Servicios'}`, 'negative')

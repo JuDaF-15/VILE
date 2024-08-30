@@ -8,10 +8,10 @@ routerCounty.get('/', [], async (req, res) => {
 
     const county = await County.find()
 
-    if(!regional) {
+    if (!regional) {
         const index = county.findIndex(element => element.name == 'Dirección General')
 
-        if(index !== -1) {
+        if (index !== -1) {
             county.splice(index, 1)
         }
     }
@@ -24,7 +24,7 @@ routerCounty.post('/', [], async (req, res) => {
 
     await county.save()
 
-    return res.json({msg: 'condado creado'})
+    return res.json({ msg: 'departamento creado' })
 })
 
 export { routerCounty }

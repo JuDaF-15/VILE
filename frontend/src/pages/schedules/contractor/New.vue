@@ -648,7 +648,7 @@
 
                         <div class="row justify-center">
                             <div class="col-12">
-                                <p class="q-my-none text-primary" style="font-size: 18px;">Obligaciones</p>
+                                <p class="q-my-none text-primary" style="font-size: 18px;">Obligaciones del Contrato</p>
                             </div>
 
                             <div class="col-12" style="width: 90%;padding-right:8px">
@@ -1038,13 +1038,13 @@ const columns = ref([
         align: 'center'
     },
     {
-        name: 'opciones',
-        label: 'Acciones',
+        name: 'estado',
+        label: 'Estado',
         align: 'center'
     },
     {
-        name: 'estado',
-        label: 'Estado',
+        name: 'opciones',
+        label: 'Acciones',
         align: 'center'
     }
 ])
@@ -1429,7 +1429,7 @@ async function getSign() {
 
             yaFirmo.value = true
 
-            showNotify('Agenda Contratista firmada', 'positive', 'check')
+            showNotify('Agenda Contratista firmada', 'positive', 'check_circle')
         } else {
             showNotify('Error, Firma no encontrada', 'negative')
         }
@@ -1519,7 +1519,7 @@ async function createSchedule() {
         if (status !== 200) {
             showNotify(data.msg, 'negative')
         } else {
-            showNotify('Agenda Creada, pendiente por aprobación del supervisor', 'positive', 'check')
+            showNotify('Agenda Creada, pendiente por aprobación del supervisor', 'positive', 'check_circle')
 
             await cleanDialog()
 
@@ -1599,7 +1599,7 @@ async function updateSchedule() {
             createdAt: Date.now()
         }, id.value)
 
-        showNotify('Agenda modificada y enviada correctamente', 'positive', 'check')
+        showNotify('Agenda modificada y enviada correctamente', 'positive', 'check_circle')
 
         confirm.value = false
 

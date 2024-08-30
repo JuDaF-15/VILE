@@ -10,7 +10,6 @@ import '@quasar/extras/fontawesome-v5/fontawesome-v5.css'
 import '@quasar/extras/fontawesome-v6/fontawesome-v6.css'
 import quasarLang from 'quasar/lang/es'
 import 'quasar/src/css/index.sass'
-import './style.css'
 
 import App from './App.vue'
 

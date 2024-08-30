@@ -147,6 +147,13 @@
                                 class="q-my-none text-center" />
                         </q-td>
                     </template>
+
+                    <template v-slot:body-cell-estado="props">
+                        <q-td :props="props">
+                            <span :class="{ 'text-red': props.row.status.data === 'Agenda rechazada' }">Rechazada</span>
+                        </q-td>
+                    </template>
+
                 </q-table>
             </div>
 
@@ -672,7 +679,8 @@
                             <div class="row" style="width:90%">
                                 <div class="col-12">
                                     <div class="col-10 q-mt-md">
-                                        <q-input v-model="object" autogrow filled stack-label label="Objeto" />
+                                        <q-input v-model="object" autogrow filled stack-label
+                                            label="Objeto de la comisión" />
                                     </div>
                                 </div>
                             </div>
@@ -924,7 +932,7 @@ onBeforeMount(async function () {
 
     currentUser.value = data
 
-    console.log(data)
+    //console.log(data)
 
     if (user.role.data == 'user') {
         currentUser.value.role = 'user'
@@ -946,7 +954,7 @@ async function getSign() {
     if (currentUser.value.sign) {
         sign.value.publicWorker = currentUser.value.sign.url
         yaFirmo.value = true
-        showNotify('Agenda firmada', 'positive', 'check')
+        showNotify('Agenda firmada', 'positive', 'check_circle')
     } else {
         showNotify('Error, Firma no encontrada', 'negative')
     }
@@ -966,7 +974,7 @@ async function getCounty(query = {}) {
 
 async function getSchedule(id, query = { publicWorker: true }) {
     const { data } = await scheduleStore.getScheduleParams(id, query)
-    console.log(data)
+    //console.log(data)
 
     return data
 }
@@ -1150,7 +1158,7 @@ async function createSchedule() {
         if (status !== 200) {
             showNotify(data.msg, 'negative')
         } else if (sign.value.publicWorker !== null) {
-            showNotify('Agenda Creada, pendiente por aprobación del ordenador del gasto', 'positive', 'check')
+            showNotify('Agenda Creada, pendiente por aprobación del ordenador del gasto', 'positive', 'check_circle')
 
             await cleanDialog()
 
@@ -1158,7 +1166,7 @@ async function createSchedule() {
             confirm.value = false
             yaFirmo.value = false
         } else {
-            showNotify('Agenda Creada', 'positive', 'check')
+            showNotify('Agenda Creada', 'positive', 'check_circle')
         }
 
     }
@@ -1219,12 +1227,13 @@ async function updateSchedule() {
 
         await cleanDialog()
 
-        showNotify('Agenda modificada y enviada correctamente', 'positive', 'check')
+        showNotify('Agenda modificada y enviada correctamente', 'positive', 'check_circle')
 
         showDialog.value = false
 
         confirm.value = false
 
+        window.location.reload()
     }
     loading.value = false
 }
@@ -1294,6 +1303,11 @@ const columns = ref([
     {
         name: 'tripDate',
         label: 'Fecha Desplazamiento',
+        align: 'center'
+    },
+    {
+        name: 'estado',
+        label: 'Estado',
         align: 'center'
     },
     {

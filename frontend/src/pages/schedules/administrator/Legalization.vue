@@ -100,6 +100,7 @@
                 <!-- TABLA MIA -->
                 <q-table class="my-sticky-header-table" :loading="cargando" :rows="rows" :columns="columns" row-key="name"
                     :filter="filter">
+
                     <template v-slot:body-cell-opciones="props">
                         <q-td :props="props">
                             <q-icon @click="function () {
@@ -210,7 +211,19 @@
                             <p v-else class="q-my-none text-center">-</p>
                         </q-td>
                     </template>
+
+                    <template v-slot:body-cell-estado="props">
+                        <q-td :props="props">
+                            <span :class="{ 'text-red': props.row.status.data === 'Legalización Rechazada' }">
+                                {{ props.row.status.data === 'Legalización Rechazada' ? 'Rechazada' : 'Pendiente por crear'
+                                }}
+                            </span>
+                        </q-td>
+                    </template>
+
+
                 </q-table>
+
                 <!-- FIN TABLA MIA -->
             </div>
 
@@ -552,6 +565,12 @@ onBeforeMount(async function () {
 
             rows.value = data
 
+            columns.value.splice(4, 0, {
+                name: 'estado',
+                label: 'Estado',
+                align: 'center'
+            })
+
         } else {
             const { data } = await scheduleStore.getScheduleParams(user.value.id, {
                 publicWorker: user.value.id,
@@ -559,6 +578,7 @@ onBeforeMount(async function () {
             })
 
             rows.value = data
+
         }
     }
 
@@ -570,8 +590,11 @@ onBeforeMount(async function () {
             })
 
             rows.value = data
+
+
         } else {
             rows.value = await getSchedule()
+
 
             columns.value.unshift({
                 name: 'name',
@@ -599,7 +622,11 @@ onBeforeMount(async function () {
                 align: 'center'
             }
         )
+
         rows.value = data
+
+        rows.value.reverse()
+
     }
     //console.log(currentUser.value);
     cargando.value = false
@@ -727,7 +754,7 @@ async function postLegalization() {
     }
 
     const data = {
-        userId : currentUser.value._id,
+        userId: currentUser.value._id,
         collections: collections.value,
         results: results.value,
         conclusions: conclusions.value,
@@ -756,9 +783,9 @@ async function postLegalization() {
         showNotify('Faltan resultados', 'negative')
     }*/
     if (data.status.index == 5 || data.status.index == 6) {
-        showNotify('Legalización firmada', 'positive', 'check')
+        showNotify('Legalización firmada', 'positive', 'check_circle')
     } else {
-        showNotify('legalización creada', 'positive', 'check')
+        showNotify('legalización creada', 'positive', 'check_circle')
     }
 
     await cleanDialog()
@@ -800,7 +827,7 @@ async function getSign() {
 
         rows.value = await getSchedule()
 
-        showNotify('Legalización firmada', 'positive', 'check')
+        showNotify('Legalización firmada', 'positive', 'check_circle')
 
         showPreview.value = false
     }
@@ -844,7 +871,7 @@ async function cleanDialog() {
 async function postReject() {
     loading.value = true
     //console.log(currentUser.value);
-    
+
     if (!justification.value) {
         showNotify('Proporcione una justificación', 'negative')
     } else {
@@ -869,6 +896,8 @@ async function postReject() {
         loading.value = false
 
         showPreview.value = false
+
+        justification.value = ''
     }
     loading.value = false
 }

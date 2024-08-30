@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const schemaUser = new mongoose.Schema({
     name: { type: String },
-    mail: { type: String, required: true, unique: true },
+    mail: { type: String, required: true, unique: true, },
     identification: { type: String, unique: true },
     password: { type: String },
     role: {
@@ -15,14 +15,14 @@ const schemaUser = new mongoose.Schema({
         index: { type: Number }
     },
 
-    contract: { 
+    contract: {
         number: { type: String },
         date: { start: { type: String }, end: { type: String } }
-    },    
+    },
 
     object: { type: String },
 
-    institute: { type: mongoose.Schema.Types.ObjectId, ref: 'Institute'},
+    institute: { type: mongoose.Schema.Types.ObjectId, ref: 'Institute' },
 
     regional: { type: mongoose.Schema.Types.ObjectId, ref: 'County' },
 
@@ -37,6 +37,7 @@ const schemaUser = new mongoose.Schema({
     paymaster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: { type: Number, default: 1 },
     recuperacion: { type: String, default: null },
-}) 
+    createdAt: { type: Date, default: Date.now },
+})
 
 export default mongoose.model('User', schemaUser)

@@ -36,7 +36,7 @@ const httpSchedule = {
                 return res.status(404).json({ msg: 'Usuario no encontrado' });
             }
 
-            const link = 'https://vile-cat.onrender.com'
+            const link = process.env.CLIENT_URL
 
             // CONTRATISTA CREA AGENDA
             if (user.role.data === "user" && user.staffType.data === "contractor") {
@@ -45,7 +45,7 @@ const httpSchedule = {
                 const supervisorEmail = user.supervisor.mail;
 
                 let mailOptions = {
-                    from: '<vilecat270@gmail.com>',
+                    from: process.env.MAIL_ADDRESS,
                     to: supervisorEmail,
                     subject: 'Creación de agenda',
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -89,7 +89,7 @@ const httpSchedule = {
                 const paymasterEmail = user.paymaster.mail;
 
                 let mailOptions = {
-                    from: '<vilecat270@gmail.com>',
+                    from: process.env.MAIL_ADDRESS,
                     to: paymasterEmail,
                     subject: 'Creación de agenda',
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -130,7 +130,7 @@ const httpSchedule = {
                 const paymasterEmail = user.paymaster.mail;
 
                 let mailOptions = {
-                    from: '<vilecat270@gmail.com>',
+                    from: process.env.MAIL_ADDRESS,
                     to: paymasterEmail,
                     subject: 'Creación de agenda',
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -320,7 +320,7 @@ const httpSchedule = {
             return res.status(404).json({ msg: 'Usuario no encontrado' });
         } */
 
-        const link = 'https://vile-cat.onrender.com'
+        const link = process.env.CLIENT_URL
 
         if (req.body.status.data === "Agenda rechazada") {
             // Obtener el usuario que modificó la agenda
@@ -330,7 +330,7 @@ const httpSchedule = {
                 // SUPERVISOR RECHAZA AGENDA
 
                 let SupervisorMailOptions = {
-                    from: '<vilecat270@gmail.com>',
+                    from: process.env.MAIL_ADDRESS,
                     to: creator.mail,
                     subject: 'Agenda Rechazada',
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -368,7 +368,7 @@ const httpSchedule = {
             } else if (modUser.role.data === "paymaster") {
                 // ORDENADOR RECHAZA AGENDA
                 let paymasterMailOptions = {
-                    from: '<vilecat270@gmail.com>',
+                    from: process.env.MAIL_ADDRESS,
                     to: creator.mail,
                     subject: 'Agenda Rechazada',
                     html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -409,7 +409,7 @@ const httpSchedule = {
 
             // NOTIFICAR AL SUPERVISOR
             let creatorMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.supervisor.mail,
                 subject: 'Agenda Modificada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -452,7 +452,7 @@ const httpSchedule = {
 
             // NOTIFICAR AL ORDENADOR
             let creatorMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.paymaster.mail,
                 subject: 'Agenda Modificada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -499,7 +499,7 @@ const httpSchedule = {
 
             // NOTIFICAR AL CONTRATISTA
             let creatorMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.mail,
                 subject: 'Agenda Aprobada y Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -530,7 +530,7 @@ const httpSchedule = {
 
             // NOTIFICAR AL ORDENADOR
             let paymasterMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.paymaster.mail,
                 subject: 'Agenda Aprobada y Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -582,7 +582,7 @@ const httpSchedule = {
 
             // NOTIFICAR AL CREADOR
             let mailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.mail,
                 subject: 'Agenda Aprobada y Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -618,7 +618,7 @@ const httpSchedule = {
             const adminUser = await User.findOne({ 'role.data': 'administrator' });
 
             let adminMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: adminUser.mail,
                 subject: 'Agenda Aprobada y Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -671,7 +671,7 @@ const httpSchedule = {
             // NOTIFICAR AL CREADOR
 
             let mailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.mail,
                 subject: 'Proceso de Legalización',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -896,11 +896,11 @@ const httpSchedule = {
         const creator = await User.findById(req.body.userId).populate('supervisor')
         const sup = await User.findById(req.body.userId)
 
-        const link = 'https://vile-cat.onrender.com'
+        const link = process.env.CLIENT_URL
 
         if (req.body.status.data === 'Legalización firmada por Contratista') {
             let mailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: creator.supervisor.mail,
                 subject: 'Legalización Firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -940,7 +940,7 @@ const httpSchedule = {
         } else if (req.body.status.data === 'Legalización Rechazada') {
 
             let SupervisorMailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: schedule.contract.mail,
                 subject: 'Agenda Rechazada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">
@@ -978,7 +978,7 @@ const httpSchedule = {
         } else if (req.body.status.data === 'Legalización firmada por Supervisor') {
 
             let mailOptions = {
-                from: '<vilecat270@gmail.com>',
+                from: process.env.MAIL_ADDRESS,
                 to: schedule.contract.mail,
                 subject: 'Legalización aprobada y firmada',
                 html: `<div style="border: 1px solid #ccc; padding: 20px; max-width: 600px; margin: 0 auto;text-align:center">

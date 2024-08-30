@@ -8,7 +8,7 @@
             <q-card class="my-card" id="cardP">
                 <router-link to="perfil" class="cardP">
                     <q-card-section>
-                        <div class="text-h6" id="name">Perfil de Usuario</div>
+                        <div class="text-h6" id="name">Perfil</div>
                     </q-card-section>
 
                     <q-card-section class="q-pt-none">

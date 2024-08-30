@@ -21,6 +21,7 @@ import Profile from '../pages/Profile.vue'
 const requireAuth = (to, from, next) => {
     const token = LocalStorage.getItem('token');
     if (!token) {
+        // No se puede pasar del login si el usuario no inicia sesión
         LocalStorage.remove('token');
         next('/');
         Notify.create({

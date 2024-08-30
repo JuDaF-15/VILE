@@ -11,7 +11,7 @@ routerCity.get('/', [], async (req, res) => {
 routerCity.get('/search', [], async (req, res) => {
     const { county } = req.query
 
-    const city = await City.find({county: county})
+    const city = await City.find({ county: county })
 
     return res.json(city)
 })
@@ -21,7 +21,7 @@ routerCity.post('/', [], async (req, res) => {
 
     await city.save()
 
-    return res.json({msg: 'Ciudad creada'})
+    return res.json({ msg: 'Ciudad creada' })
 })
 
 export { routerCity }

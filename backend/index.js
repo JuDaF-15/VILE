@@ -1,4 +1,4 @@
-import Server from './models/server.js'
+import Server from './server.js'
 
 import cloudinary from 'cloudinary'
 
@@ -9,8 +9,8 @@ const server = new Server()
 server.listen()
 
 cloudinary.v2.config({
-    cloud_name: 'test-001',
-    api_key: '642124999743278',
-    api_secret: 'x7u6klEoaBOKYKbE9S_C7_3V4G0',
-    secure: true,
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET,
+    secure: true
 })

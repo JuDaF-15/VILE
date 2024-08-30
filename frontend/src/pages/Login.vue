@@ -54,7 +54,7 @@
 
                         <q-space />
 
-                        <p @click="openModal" class="q-mt-sm"
+                        <p id="olvidar" @click="openModal" class="q-mt-sm"
                             style="cursor: pointer; color: rgb(5, 13, 255);text-align: center;">
                             ¿OLVIDÓ
                             SU
@@ -145,11 +145,11 @@ function openModal() {
     modalVisible.value = true;
 }
 
-onBeforeMount(async () => {
+/*onBeforeMount(async () => {
     if ($q.localStorage.has('token')) {
         router.push('/layout')
     }
-})
+})*/
 
 async function goHome() {
     loading.value = true
@@ -166,7 +166,7 @@ async function goHome() {
             $q.localStorage.set('token', data.token)
             $q.localStorage.set('user', data.user)
             router.push('/layout')
-            showNotify('Inicio de sesión exitoso', 'positive','check')
+            showNotify('Inicio de sesión exitoso', 'positive', 'check_circle')
         }
     }
     loading.value = false
@@ -239,7 +239,11 @@ async function envioCorreo() {
 
 <style scoped>
 #card {
-    width: 37%;
+    width: 37%
+}
+
+#olvidar:hover {
+    text-decoration: underline
 }
 
 @media screen and (max-width: 600px) {

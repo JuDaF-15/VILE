@@ -4,7 +4,7 @@
             <b>Perfil de Usuario</b>
         </div>
         <div class="row justify-center q-pt-md">
-            <q-card flat bordered style="padding: 20px;">
+            <q-card flat bordered style="padding: 20px;width: 60%;">
                 <q-separator color="primary" style="
                 height: 5px;
                 margin-top: 5px;
@@ -15,13 +15,13 @@
                         <div class="col-6">
                             <p class="q-my-none"><strong v-text="'Nombre de Usuario: '" />{{ name }}</p><br>
                             <p class="q-my-none"><strong v-text="'Correo electrónico: '" />{{ mail }}</p><br>
-                            <p class="q-my-none"><strong>Posición: </strong>{{ position ? position : 'N/A' }}</p>
+                            <p class="q-my-none"><strong>Cargo: </strong>{{ position ? position : 'N/A' }}</p>
 
                         </div>
 
                         <div class="col-6">
                             <p class="q-my-none"><strong v-text="'Tipo de Usuario: '" />{{ role }}</p><br>
-                            <p class="q-my-none"><strong>Rama: </strong>{{ branch ? branch : 'N/A' }}</p>
+                            <p class="q-my-none"><strong>Dependencia: </strong>{{ branch ? branch : 'N/A' }}</p>
 
                         </div>
                     </div>
@@ -131,7 +131,7 @@ async function putSign() {
 
             sign.value = data.sign
 
-            showNotify('Firma modificada', 'positive', 'check')
+            showNotify('Firma modificada', 'positive', 'check_circle')
 
             file.value = null
         }

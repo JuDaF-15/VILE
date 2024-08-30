@@ -1,7 +1,7 @@
 <template>
     <q-page class="q-pa-md">
         <div class="text-h4 text-center q-mb-md">Usuarios</div>
-        <div class="row justify-center">
+        <div class="row justify-center  q-pt-md">
 
             <!-- tabla -->
             <div class="col-8 q-mt-md" style="width: 90%;">
@@ -87,7 +87,7 @@
 
                             <div class="col-12 q-pa-sm">
                                 <q-input filled stack-label v-model="identification" type="number"
-                                    label="No. Identificación" />
+                                    label="No. de documento" />
                             </div>
 
                             <div v-if="bd === 1" class="col-12 q-pa-sm">
@@ -144,7 +144,7 @@
 
                             <div v-if="staffType !== null && staffType.index == 0 && role.index == 3"
                                 class="col-12 q-pa-sm">
-                                <q-input v-model="object" autogrow filled stack-label label="Objeto" />
+                                <q-input v-model="object" autogrow filled stack-label label="Objeto Contractual" />
                             </div>
 
                             <div v-if="staffType !== null && staffType.index == 0 && role.index == 3 && supervisorOptions.length != 0"
@@ -160,7 +160,7 @@
                                 <q-select v-model="noSup" disable label="Supervisor" filled stack-label />
                             </div>
 
-                            <div v-if="role !== null && role.index !== 2 && role.index !== 1 && paymasterOptions.length != 0"
+                            <div v-if="role !== null && role.index !== 2 && role.index !== 1 && paymasterOptions.length > 0"
                                 class="col-12 q-pa-sm">
                                 <q-select v-model="paymaster" label="Ordenador" filled stack-label :options="paymasterOptions.map((ord) => ({
                                     label: ord.label,
@@ -416,7 +416,7 @@ async function createUser() {
             if (status !== 200) {
                 showNotify(data.msg, 'negative')
             } else {
-                showNotify(data.msg, 'positive', 'check')
+                showNotify(data.msg, 'positive', 'check_circle')
 
                 rows.value = await getUser()
 
@@ -580,7 +580,7 @@ async function editUser() {
         if (status !== 200) {
             showNotify(data.msg, 'negative')
         } else {
-            showNotify(data.msg, 'positive', 'check')
+            showNotify(data.msg, 'positive', 'check_circle')
 
             rows.value = await getUser()
 
@@ -618,7 +618,7 @@ const columns = ref([
 
     {
         name: 'identification',
-        label: 'Cédula',
+        label: 'Documento',
         align: 'center',
         field: 'identification',
         sortable: true
